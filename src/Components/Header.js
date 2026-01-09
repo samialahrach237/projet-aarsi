@@ -1,35 +1,28 @@
-import React from 'react';
-import Navigation from './Navigation';
+import { Link } from "react-router-dom";
+import logo from "../Assets/logo/logo.png";
+import "../Styles/Header.css";
 
-const Header = ({ menuOpen, toggleMenu, closeMenu }) => {
+function Header() {
   return (
-    <header>
-      
-      <nav className="nav-container">
-        <a href="#" className="logo" onClick={closeMenu}>
-          <i className="fas fa-hands-praying logo-icon"></i>
-          AAR<span>SSI</span>
-        </a>
-        
-        <button className="mobile-menu-btn" onClick={toggleMenu}>
-          <i className={menuOpen ? "fas fa-times" : "fas fa-bars"}></i>
-        </button>
-        
-        <Navigation menuOpen={menuOpen} closeMenu={closeMenu} />
-        
-        <div className="lang-connexion">
-          <select className="lang-select">
-            <option value="fr">Français</option>
-            <option value="ar">العربية</option>
-            <option value="en">English</option>
-          </select>
-          <button className="connexion-btn">
-            <i className="fas fa-sign-in-alt"></i> Connexion
-          </button>
-        </div>
+    <header className="header">
+      <div className="header-left">
+        <img src={logo} alt="Logo" className="logo" />
+      <span>AARSSI</span>
+      </div>
+
+      <nav className="nav">
+        <Link to="/">Accueil</Link>
+        <Link to="/services">Services</Link>
+        <Link to="/avis">Avis</Link>
       </nav>
+
+      <div className="header-right">
+        <Link to="/connexion" className="login-btn">
+          Connexion
+        </Link>
+      </div>
     </header>
   );
-};
+}
 
 export default Header;
