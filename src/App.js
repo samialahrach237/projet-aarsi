@@ -1,30 +1,25 @@
-import React, { useState } from 'react';
-import Header from './Components/Header';
-import Hero from './Components/Hero';
-import Footer from './Components/Footer';
-import './App.css';
+import { Routes, Route, BrowserRouter } from "react-router-dom";
+import Header from "./Components/Header.js";
+import Footer from "./Components/Footer";
+import Accueil from "./pages/Accueil";
+import Services from "./pages/Services";
+import Avis from "./pages/Avis";
+import Connexion from "./pages/Connexion";
 
 function App() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
-  
-  const closeMenu = () => {
-    setMenuOpen(false);
-  };
-  
   return (
-    <div className="app">
-      <Header 
-        menuOpen={menuOpen} 
-        toggleMenu={toggleMenu} 
-        closeMenu={closeMenu}
-      />
-      <Hero />
+    <>
+    <BrowserRouter>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Accueil />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/avis" element={<Avis />} />
+        <Route path="/connexion" element={<Connexion />} />
+      </Routes>
       <Footer />
-    </div>
+        </BrowserRouter>
+    </>
   );
 }
 
