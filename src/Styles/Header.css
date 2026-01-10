@@ -1,39 +1,125 @@
+/* src/Styles/Header.css */
 .header {
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 5%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-left .logo-link {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 15px 40px;
-  background: rgb(247, 243, 243);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  gap: 10px;
 }
 
 .logo {
-  width: 80px;
+  height: 40px;
+  width: auto;
+}
+
+.brand-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  letter-spacing: 1px;
+}
+
+.nav {
+  display: flex;
+  gap: 30px;
 }
 
 .nav a {
-  margin: 0 15px;
   text-decoration: none;
-  color: #058b0c;
+  color: #555;
   font-weight: 500;
+  font-size: 16px;
+  transition: color 0.3s;
+  position: relative;
 }
 
-.nav a:hover {
+.nav a:hover, .nav a.active-link {
   color: #c89b3c;
 }
 
-.login-btn {
-  background: #c89b3c;
+.header-right .login-btn {
+  background-color: #c89b3c;
   color: white;
-  padding: 8px 18px;
-  border-radius: 20px;
+  padding: 10px 25px;
+  border-radius: 25px;
   text-decoration: none;
-}
-span {
-  font-size: 24px;
   font-weight: bold;
-  margin-left: 10px;
-  color: #058b0c;
+  transition: background-color 0.3s;
 }
 
+.header-right .login-btn:hover {
+  background-color: #b08630;
+}
 
+.menu-icon {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+}
+
+.bar {
+  width: 25px;
+  height: 3px;
+  background-color: #333;
+  transition: 0.3s;
+}
+
+.login-btn-mobile {
+  display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .menu-icon {
+    display: flex;
+  }
+
+  .nav {
+    position: absolute;
+    top: 70px; /* ارتفاع الهيدر تقريباً */
+    left: 0;
+    width: 100%;
+    background-color: white;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    box-shadow: 0 10px 10px rgba(0,0,0,0.1);
+    transform: translateY(-200%); /* إخفاء القائمة للأعلى */
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .nav.nav-open {
+    transform: translateY(0);
+  }
+
+  .header-right {
+    display: none; /* إخفاء زر الدخول العادي في الموبايل */
+  }
+
+  .login-btn-mobile {
+    display: block;
+    background-color: #c89b3c;
+    color: white !important;
+    padding: 10px 30px;
+    border-radius: 5px;
+    margin-top: 10px;
+  }
+}

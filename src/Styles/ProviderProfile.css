@@ -1,0 +1,243 @@
+/* src/Styles/ProviderProfile.css */
+
+.profile-page {
+  background-color: #F9F9F9;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* --- Hero Section --- */
+.profile-hero {
+  height: 60vh; /* ارتفاع كبير للصورة كما في الشريحة 6 */
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+}
+
+/* --- Floating Info Card (The key design element of Slide 6) --- */
+.profile-info-card {
+  background: white;
+  width: 85%;
+  max-width: 1100px;
+  margin: -80px auto 0; /* سحب البطاقة للأعلى لتتداخل مع الصورة */
+  position: relative;
+  z-index: 10;
+  border-radius: 8px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 40px;
+  border: 1px solid rgba(212, 175, 55, 0.2); /* حدود ذهبية خفيفة */
+}
+
+/* Mobile Responsive for Card */
+@media (max-width: 768px) {
+  .profile-info-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+    padding: 20px;
+    margin-top: -40px;
+  }
+}
+
+.info-main {
+  flex: 2;
+}
+
+.provider-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  color: #1A1A1A;
+  margin: 0 0 5px 0;
+}
+
+.provider-location {
+  color: #666;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.info-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 0 30px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background-color: #EEE;
+}
+
+.stars {
+  color: #D4AF37;
+  font-size: 1.2rem;
+}
+
+.rating-text {
+  font-size: 0.85rem;
+  color: #888;
+  margin-top: 4px;
+}
+
+.booking-count {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1A1A1A;
+}
+
+.booking-label {
+  font-size: 0.7rem;
+  color: #888;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.book-now-btn {
+  background-color: #006B57; /* اللون الزمردي من الهوية البصرية */
+  color: white;
+  border: none;
+  padding: 15px 35px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0, 107, 87, 0.3);
+  transition: 0.3s;
+}
+
+.book-now-btn:hover {
+  background-color: #005a49;
+  transform: translateY(-2px);
+}
+
+/* --- Tabs & Content --- */
+.profile-content-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.profile-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 50px;
+  border-bottom: 1px solid #EEE;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding-bottom: 15px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: #888;
+  cursor: pointer;
+  position: relative;
+}
+
+.tab-btn.active {
+  color: #D4AF37; /* ذهبي */
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #D4AF37;
+}
+
+/* --- Packages List (Slide 7 Style) --- */
+.packages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-title {
+  text-align: center;
+  color: #1A1A1A;
+  margin-bottom: 30px;
+}
+
+.package-card {
+  background: white;
+  border: 1px solid #EEE;
+  border-radius: 6px;
+  padding: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.package-card:hover {
+  border-color: #D4AF37;
+  box-shadow: 0 5px 20px rgba(212, 175, 55, 0.15);
+}
+
+.package-header {
+  flex: 1;
+}
+
+.package-title {
+  color: #D4AF37;
+  margin: 0 0 5px 0;
+  font-size: 1.3rem;
+}
+
+.package-price {
+  font-weight: 700;
+  color: #1A1A1A;
+  font-size: 1.1rem;
+}
+
+.package-features {
+  flex: 2;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  columns: 2; /* تقسيم المزايا لعمودين */
+}
+
+.package-features li {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 5px;
+}
+
+.select-package-btn {
+  background-color: #D4AF37;
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.select-package-btn:hover {
+  background-color: #b89225;
+}
