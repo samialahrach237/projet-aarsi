@@ -201,3 +201,16 @@
   background-color: var(--color-gold);
   color: white;
 }
+
+/* --- No Results Message --- */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  grid-column: 1 / -1;
+}
+
+.no-results p {
+  font-size: 1.2rem;
+  color: #666;
+  margin: 0;
+}

@@ -1,4 +1,5 @@
 import "../Styles/Footer.css";
+import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn } from 'react-icons/fa';
 
 
 function Footer() {
@@ -35,9 +36,18 @@ function Footer() {
         <div className="footer-col">
           <h4>Follow Us</h4>
           <div className="social-icons">
-            <span>📸</span>
-            <span>📘</span>
-            <span>💬</span>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon facebook">
+              <FaFacebookF />
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-icon instagram">
+              <FaInstagram />
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-icon twitter">
+              <FaTwitter />
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-icon linkedin">
+              <FaLinkedinIn />
+            </a>
           </div>
         </div>
       </div>
