@@ -8,9 +8,15 @@ function Connexion() {
 
   const handleLogin = (e) => {
     e.preventDefault();
+    const email = e.target.email.value;
+    const password = e.target.password.value;
     
     if (role === "provider") {
-      navigate("/provider");
+      // Logic for provider login redirection
+      if (email && password) {
+        sessionStorage.setItem("isProviderAuthenticated", "true");
+        navigate("/provider-dashboard");
+      }
     } else if (role === "user") {
       navigate("/user-dashboard");
     } else {
