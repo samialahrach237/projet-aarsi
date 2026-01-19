@@ -37,7 +37,7 @@ function Header() {
           <Link to="/" className={isActive("/")} onClick={toggleMenu}>Accueil</Link>
           <Link to="/services" className={isActive("/services")} onClick={toggleMenu}>Services</Link>
           <Link to="/avis" className={isActive("/avis")} onClick={toggleMenu}>Avis</Link>
-          <Link to="/connexion" className={`login-btn-mobile ${isActive("/connexion")}`} onClick={toggleMenu}>Connexion</Link>
+         
         </nav>
 
         <div className="header-right">

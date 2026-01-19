@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import "../Styles/Accueil.css";
-import ServiceCategories from "../Components/ServiceCategories";
 
 function Accueil() {
   return (
@@ -9,10 +8,11 @@ function Accueil() {
       <section className="organizer-section">
         <div className="organizer-container">
           <div className="organizer-content">
-            <h2 className="organizer-title">Tout pour organiser votre événement</h2>
+            <h2 className="organizer-title">Ghir B'click un marriage magic  </h2>
             <p className="organizer-description">
-              Aarsi réunit des prestataires fiables pour tous vos événements. 
-              Parcourez des photos, infos et demandez un devis, le tout au même endroit.
+               Découvrez une plateforme unique dédiée aux futurs mariés. 
+               Accédez à une sélection exclusive de prestataires de confiance et organisez 
+               chaque détail de votre cérémonie avec clarté et professionnalisme
             </p>
             <Link to="/services" className="organizer-btn">
               Lancez une recherche
@@ -24,17 +24,17 @@ function Accueil() {
 
           <div className="organizer-gallery">
             <div className="collage-grid">
-              <div className="collage-item vertical">
-                <img src="/images/salle2.jpg" alt="Salle de mariage" />
+              <div className="collage-item">
+                <img src="/images/photographie7.jpg" alt="Photographe professionnel" />
               </div>
-              <div className="collage-item horizontal">
-                <img src="/images/Traiteur3.jpg" alt="Traiteur marocain" />
+              <div className="collage-item">
+                <img src="/images/Traiteur3.jpg" alt="Traiteur gastronomique" />
               </div>
-              <div className="collage-item large">
-                <img src="/images/La Mariée Marocaine.jpg" alt="Mariée marocaine" />
+              <div className="collage-item">
+                <img src="/images/image6.jpg" alt="Salon de réception" />
               </div>
-              <div className="collage-item small">
-                <img src="/images/nagafa3.jpg" alt="Negafa et bijoux" />
+              <div className="collage-item">
+                <img src="/images/image2.jpg" alt="Tyafer traditionnel" />
               </div>
             </div>
           </div>
@@ -73,9 +73,6 @@ function Accueil() {
         </div>
       </section>
 
-      {/* Service Categories Grid */}
-      <ServiceCategories />
-      
     </div>
   );
 }

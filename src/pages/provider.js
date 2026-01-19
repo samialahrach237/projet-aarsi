@@ -1,29 +1,21 @@
-<<<<<<< HEAD
-import { useState, useEffect } from "react";
-=======
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import providerService from "../services/providerService";
->>>>>>> 6b5af84dd9f68ddf1ddc55d636530f92688b2794
 import "../Styles/Provider.css";
 import { getAllCategories, getUniqueCities } from "../data/serviceRepo";
 
 function Provider() {
-<<<<<<< HEAD
   const [categories] = useState(getAllCategories());
   const [cities] = useState(getUniqueCities());
-  
-=======
   const [step, setStep] = useState(1);
->>>>>>> 6b5af84dd9f68ddf1ddc55d636530f92688b2794
   const [formData, setFormData] = useState({
     profileName: "",
     email: "",
     phoneNumber: "",
     service: "",
     city: "",
-    images: [], // Array for multiple images
-    imagePreviews: [] // Array for multiple previews
+    images: [],
+    imagePreviews: []
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -61,7 +53,7 @@ function Provider() {
   };
 
   const nextStep = () => {
-    if (step === 1 && formData.profileName && formData.email && formData.phoneNumber) {
+    if (formData.profileName && formData.email && formData.phoneNumber) {
       setStep(2);
     } else {
       alert("Veuillez remplir tous les champs obligatoires.");
@@ -72,24 +64,27 @@ function Provider() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.service || !formData.city) {
+        alert("Veuillez sélectionner un service et une ville.");
+        return;
+    }
     setIsSubmitting(true);
     
     try {
-      // Create provider with pending status
       providerService.createProvider({
         name: formData.profileName,
         email: formData.email,
         service: formData.service,
         city: formData.city,
         phone: formData.phoneNumber,
-        images: formData.imagePreviews // Send all image previews
+        images: formData.imagePreviews
       });
       
-      alert(`\u2705 Profil cr\u00e9\u00e9 avec succ\u00e8s! Il est en attente d'approbation.`);
+      alert(`✅ Profil créé avec succès! Il est en attente d'approbation.`);
       navigate('/');
     } catch (error) {
       console.error("Error creating provider:", error);
-      alert("❌ Erreur lors de la cr\u00e9ation.");
+      alert("❌ Erreur lors de la création.");
     } finally {
       setIsSubmitting(false);
     }
@@ -102,97 +97,146 @@ function Provider() {
         <p className="provider-subtitle">Rejoignez l'élite du mariage en quelques clics</p>
       </div>
 
-<<<<<<< HEAD
       <div className="provider-form-container">
-        <form className="provider-form" onSubmit={handleSubmit}>
-          <h2 className="form-title">Créer votre profil</h2>
-
-          <div className="form-group">
-            <label htmlFor="profileName">👤 Nom du Profil</label>
-            <input
-              type="text"
-              id="profileName"
-              name="profileName"
-              placeholder="Ex: Studio Photo Marrakech"
-              className="form-input"
-              value={formData.profileName}
-              onChange={handleChange}
-              required
-            />
+        <div className="multi-step-container">
+          {/* Progress Bar */}
+          <div className="progress-bar">
+            <div className={`progress-step ${step >= 1 ? "active" : ""}`}>1. Informations</div>
+            <div className={`progress-line ${step >= 2 ? "active" : ""}`}></div>
+            <div className={`progress-step ${step >= 2 ? "active" : ""}`}>2. Détails & Media</div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="service">💍 Type de Service</label>
-            <select
-              id="service"
-              name="service"
-              className="form-select"
-              value={formData.service}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Sélectionnez un service</option>
-              {categories.filter(cat => cat.id !== 'all').map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.title}</option>
-              ))}
-            </select>
-          </div>
+          <form className="provider-form-multi" onSubmit={handleSubmit}>
+            {step === 1 && (
+              <div className="form-step-content animation-slide-in">
+                <h2 className="form-step-title">Coordonnées</h2>
+                
+                <div className="form-group">
+                  <label htmlFor="profileName">👤 Nom du Profil</label>
+                  <input 
+                    type="text" 
+                    id="profileName"
+                    name="profileName" 
+                    value={formData.profileName} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="Ex: Studio Photo Prestige" 
+                    className="form-input" 
+                  />
+                </div>
 
-          <div className="form-group">
-            <label htmlFor="city">🏛️ Ville</label>
-            <select
-              id="city"
-              name="city"
-              className="form-select"
-              value={formData.city}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Sélectionnez une ville</option>
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-          </div>
+                <div className="form-group">
+                  <label htmlFor="email">📧 Email Professionnel</label>
+                  <input 
+                    type="email" 
+                    id="email"
+                    name="email" 
+                    value={formData.email} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="contact@votreentreprise.com" 
+                    className="form-input" 
+                  />
+                </div>
 
-          <div className="form-group">
-            <label htmlFor="country">🌍 Pays</label>
-            <select
-              id="country"
-              name="country"
-              className="form-select"
-              value={formData.country}
-              onChange={handleChange}
-              required
-            >
-              <option value="Morocco">Maroc</option>
-              <option value="Algeria">Algérie</option>
-              <option value="Tunisia">Tunisie</option>
-              <option value="France">France</option>
-              <option value="Belgium">Belgique</option>
-              <option value="Spain">Espagne</option>
-            </select>
-          </div>
+                <div className="form-group">
+                  <label htmlFor="phoneNumber">📞 Téléphone</label>
+                  <input 
+                    type="tel" 
+                    id="phoneNumber"
+                    name="phoneNumber" 
+                    value={formData.phoneNumber} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="+212 6XX XXX XXX" 
+                    className="form-input" 
+                  />
+                </div>
 
-          <div className="form-group">
-            <label htmlFor="phoneNumber">📞 Numéro de Téléphone</label>
-            <input
-              type="tel"
-              id="phoneNumber"
-              name="phoneNumber"
-              placeholder="Ex: +212 6XX XXX XXX"
-              className="form-input"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              required
-              pattern="[+]?[0-9\s-]+"
-            />
-          </div>
+                <div className="form-navigation">
+                  <button type="button" onClick={nextStep} className="btn-next">Suivant ➔</button>
+                </div>
+              </div>
+            )}
 
-          <button type="submit" className="btn-submit">
-            ✔️ Créer mon profil
-          </button>
-        </form>
+            {step === 2 && (
+              <div className="form-step-content animation-slide-in">
+                <h2 className="form-step-title">Détails du Service</h2>
+
+                <div className="form-group">
+                  <label htmlFor="service">💍 Type de Service</label>
+                  <select 
+                    id="service"
+                    name="service" 
+                    value={formData.service} 
+                    onChange={handleChange} 
+                    required 
+                    className="form-select"
+                  >
+                    <option value="">Sélectionnez un service</option>
+                    {categories.filter(cat => cat.id !== 'all').map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="city">🏛️ Ville</label>
+                  <select 
+                    id="city"
+                    name="city" 
+                    value={formData.city} 
+                    onChange={handleChange} 
+                    required 
+                    className="form-select"
+                  >
+                    <option value="">Sélectionnez une ville</option>
+                    {cities.map(city => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>📸 Photos du Service</label>
+                  <div className="images-grid">
+                    {formData.imagePreviews.map((preview, index) => (
+                      <div key={index} className="image-preview-container">
+                        <img src={preview} alt={`Preview ${index}`} className="image-preview-item" />
+                        <button type="button" className="remove-image-btn" onClick={() => removeImage(index)}>×</button>
+                      </div>
+                    ))}
+                    
+                    {formData.imagePreviews.length < 3 && (
+                      <div className="image-upload-wrapper">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          multiple 
+                          onChange={handleImageChange} 
+                          className="image-input" 
+                          id="image-upload" 
+                        />
+                        <label htmlFor="image-upload" className="image-label">
+                          <div className="upload-placeholder">
+                            <span>📷 +</span>
+                          </div>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="form-navigation">
+                  <button type="button" onClick={prevStep} className="btn-prev">⬅ Retour</button>
+                  <button type="submit" className="btn-submit-final" disabled={isSubmitting}>
+                    {isSubmitting ? "⏳..." : "✔️ Créer Profil"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </form>
+        </div>
 
         <div className="info-card">
           <h3>🌟 Pourquoi rejoindre AARSSI?</h3>
@@ -202,141 +246,7 @@ function Provider() {
             <li>✅ Visibilité accrue pour votre business</li>
             <li>✅ Système d'avis et de notation</li>
           </ul>
-=======
-      <div className="multi-step-container">
-        {/* Progress Bar */}
-        <div className="progress-bar">
-          <div className={`progress-step ${step >= 1 ? "active" : ""}`}>1. Informations</div>
-          <div className={`progress-line ${step >= 2 ? "active" : ""}`}></div>
-          <div className={`progress-step ${step >= 2 ? "active" : ""}`}>2. Détails & Media</div>
->>>>>>> 6b5af84dd9f68ddf1ddc55d636530f92688b2794
         </div>
-
-        <form className="provider-form-multi" onSubmit={handleSubmit}>
-          {step === 1 && (
-            <div className="form-step-content animation-slide-in">
-              <h2 className="form-step-title">Coordonnées</h2>
-              
-              <div className="form-group">
-                <label>👤 Nom du Profil</label>
-                <input 
-                  type="text" 
-                  name="profileName" 
-                  value={formData.profileName} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="Ex: Studio Photo Prestige" 
-                  className="form-input" 
-                />
-              </div>
-
-              <div className="form-group">
-                <label>📧 Email Professionnel</label>
-                <input 
-                  type="email" 
-                  name="email" 
-                  value={formData.email} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="contact@votreentreprise.com" 
-                  className="form-input" 
-                />
-              </div>
-
-              <div className="form-group">
-                <label>📞 Téléphone</label>
-                <input 
-                  type="tel" 
-                  name="phoneNumber" 
-                  value={formData.phoneNumber} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="+212 6XX XXX XXX" 
-                  className="form-input" 
-                />
-              </div>
-
-              <div className="form-navigation">
-                <button type="button" onClick={nextStep} className="btn-next">Suivant ➔</button>
-              </div>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="form-step-content animation-slide-in">
-              <h2 className="form-step-title">Détails du Service</h2>
-
-              <div className="form-group">
-                <label>💍 Type de Service</label>
-                <select name="service" value={formData.service} onChange={handleChange} required className="form-select">
-                  <option value="">Sélectionnez</option>
-                  <option value="Negafa">Negafa</option>
-                  <option value="Traiteur">Traiteur</option>
-                  <option value="Photographe">Photographe</option>
-                  <option value="Salles">Salles de réception</option>
-                  <option value="Musique">Musique & Orchestre</option>
-                  <option value="Coiffure">Coiffure & Maquillage</option>
-                  <option value="Decoration">Décoration</option>
-                  <option value="Patisserie">Pâtisserie</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>🏛️ Ville</label>
-                <select name="city" value={formData.city} onChange={handleChange} required className="form-select">
-                  <option value="">Sélectionnez une ville</option>
-                  <option value="Casablanca">Casablanca</option>
-                  <option value="Rabat">Rabat</option>
-                  <option value="Marrakech">Marrakech</option>
-                  <option value="Fès">Fès</option>
-                  <option value="Tanger">Tanger</option>
-                  <option value="Agadir">Agadir</option>
-                  <option value="Meknès">Meknès</option>
-                  <option value="Oujda">Oujda</option>
-                  <option value="Kenitra">Kenitra</option>
-                  <option value="Tétouan">Tétouan</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>📸 Photos du Service</label>
-                <div className="images-grid">
-                  {formData.imagePreviews.map((preview, index) => (
-                    <div key={index} className="image-preview-container">
-                      <img src={preview} alt={`Preview ${index}`} className="image-preview-item" />
-                      <button type="button" className="remove-image-btn" onClick={() => removeImage(index)}>×</button>
-                    </div>
-                  ))}
-                  
-                  {formData.imagePreviews.length < 3 && (
-                    <div className="image-upload-wrapper">
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        multiple 
-                        onChange={handleImageChange} 
-                        className="image-input" 
-                        id="image-upload" 
-                      />
-                      <label htmlFor="image-upload" className="image-label">
-                        <div className="upload-placeholder">
-                          <span>📷 +</span>
-                        </div>
-                      </label>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="form-navigation">
-                <button type="button" onClick={prevStep} className="btn-prev">⬅ Retour</button>
-                <button type="submit" className="btn-submit-final" disabled={isSubmitting}>
-                  {isSubmitting ? "⏳..." : "✔️ Créer Profil"}
-                </button>
-              </div>
-            </div>
-          )}
-        </form>
       </div>
     </div>
   );
