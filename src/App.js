@@ -16,6 +16,7 @@ import Services from "./pages/Services";
 import ProviderProfile from "./pages/ProviderProfile"; // صفحة تفاصيل الخدمة
 import UserDashboard from "./pages/UserDashboard"; // لوحة تحكم المستخدم
 import Provider from "./pages/provider"; // صفحة Provider
+import ProviderDashboard from "./pages/ProviderDashboard"; // لوحة تحكم Provider
 import Admin from "./pages/Admin"; // صفحة Admin
 import AdminLogin from "./pages/AdminLogin"; // صفحة تسجيل دخول Admin
 import Avis from "./pages/Avis";
@@ -39,6 +40,7 @@ function App() {
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
         <Route path="/provider" element={<Provider />} />
+        <Route path="/provider-dashboard" element={<ProviderDashboard />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/avis" element={<Avis />} />
