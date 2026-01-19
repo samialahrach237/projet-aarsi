@@ -16,6 +16,8 @@ import Services from "./pages/Services";
 import ProviderProfile from "./pages/ProviderProfile"; // صفحة تفاصيل الخدمة
 import UserDashboard from "./pages/UserDashboard"; // لوحة تحكم المستخدم
 import Provider from "./pages/provider"; // صفحة Provider
+import Admin from "./pages/Admin"; // صفحة Admin
+import AdminLogin from "./pages/AdminLogin"; // صفحة تسجيل دخول Admin
 import Avis from "./pages/Avis";
 import Connexion from "./pages/Connexion";
 import NotFound from "./pages/error"; // صفحة 404
@@ -37,6 +39,8 @@ function App() {
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
         <Route path="/provider" element={<Provider />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/avis" element={<Avis />} />
         <Route path="/connexion" element={<Connexion />} />
         {/* Catch-all route for 404 - must be last */}
