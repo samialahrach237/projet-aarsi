@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../Styles/Provider.css";
+import { getAllCategories, getUniqueCities } from "../data/serviceRepo";
 
 function Provider() {
+  const [categories] = useState(getAllCategories());
+  const [cities] = useState(getUniqueCities());
+  
   const [formData, setFormData] = useState({
     profileName: "",
     service: "",
@@ -68,14 +72,9 @@ Téléphone: ${formData.phoneNumber}`);
               required
             >
               <option value="">Sélectionnez un service</option>
-              <option value="Negafa">Negafa</option>
-              <option value="Traiteur">Traiteur</option>
-              <option value="Photographe">Photographe</option>
-              <option value="Salles">Salles de réception</option>
-              <option value="Musique">Musique & Orchestre</option>
-              <option value="Coiffure">Coiffure & Maquillage</option>
-              <option value="Decoration">Décoration</option>
-              <option value="Patisserie">Pâtisserie</option>
+              {categories.filter(cat => cat.id !== 'all').map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.title}</option>
+              ))}
             </select>
           </div>
 
@@ -90,16 +89,9 @@ Téléphone: ${formData.phoneNumber}`);
               required
             >
               <option value="">Sélectionnez une ville</option>
-              <option value="Casablanca">Casablanca</option>
-              <option value="Rabat">Rabat</option>
-              <option value="Marrakech">Marrakech</option>
-              <option value="Fès">Fès</option>
-              <option value="Tanger">Tanger</option>
-              <option value="Agadir">Agadir</option>
-              <option value="Meknès">Meknès</option>
-              <option value="Oujda">Oujda</option>
-              <option value="Kenitra">Kenitra</option>
-              <option value="Tétouan">Tétouan</option>
+              {cities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
             </select>
           </div>
 

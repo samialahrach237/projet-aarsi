@@ -93,11 +93,11 @@ function UserDashboard() {
             <h2>Mon Profil</h2>
             <div className="form-group">
               <label>Nom Complet</label>
-              <input type="text" defaultValue="Ayoub Touati" />
+              <input type="text" defaultValue="samia lahrach" />
             </div>
             <div className="form-group">
               <label>Email</label>
-              <input type="email" defaultValue="ayoub@example.com" />
+              <input type="email" defaultValue="samia@example.com" />
             </div>
             <div className="form-group">
               <label>Téléphone</label>
