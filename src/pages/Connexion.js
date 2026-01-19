@@ -19,8 +19,9 @@ function Connexion() {
   };
 
   return (
-    <div className="connexion-container">
-      <h2>Connexion</h2>
+    <div className="connexion-page">
+      <div className="connexion-container">
+        <h2>Connexion</h2>
 
       <form onSubmit={handleLogin}>
         <div className="form-group">
@@ -67,6 +68,7 @@ function Connexion() {
         </button>
       </form>
     </div>
+  </div>
   );
 }
 
