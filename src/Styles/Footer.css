@@ -1,7 +1,7 @@
 /* src/Styles/Footer.css */
 .footer {
   background-color: var(--color-bg-soft);
-  padding: 80px 5% 40px;
+  padding: 15px 5% 10px; /* Further reduced vertical padding */
   color: var(--color-text-main);
   border-top: 1px solid var(--color-border-light);
 }
@@ -69,11 +69,11 @@
 
 .footer-bottom {
   text-align: center;
-  margin-top: 80px;
-  font-size: 0.9rem;
+  margin-top: 8px; /* Further reduced margin */
+  font-size: 0.8rem; /* Smaller text */
   color: var(--color-text-muted);
   border-top: 1px solid var(--color-border-light);
-  padding-top: 30px;
+  padding-top: 8px; /* Further reduced padding */
 }
 
 /* Responsive */

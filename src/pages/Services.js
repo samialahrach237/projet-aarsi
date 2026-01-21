@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { FaGlobe, FaHome, FaUtensils, FaCrown, FaCamera, FaMusic, FaGem, FaGift } from 'react-icons/fa';
 import SearchBar from '../Components/SearchBar';
 import ServiceCard from '../Components/ServiceCard';
 import { getAllServices, getAllCategories, getUniqueCities } from '../data/serviceRepo';
@@ -38,6 +39,29 @@ function Services() {
       ...prev,
       [filterType]: value
     }));
+  };
+
+  const getCategoryIcon = (categoryId) => {
+    switch(categoryId) {
+      case 'all':
+        return <FaGlobe className="category-icon" />;
+      case 'Salle':
+        return <FaHome className="category-icon" />;
+      case 'Traiteur':
+        return <FaUtensils className="category-icon" />;
+      case 'Negafa':
+        return <FaCrown className="category-icon" />;
+      case 'Photographe':
+        return <FaCamera className="category-icon" />;
+      case 'DJ':
+        return <FaMusic className="category-icon" />;
+      case 'Bijoux':
+        return <FaGem className="category-icon" />;
+      case 'Tyafer':
+        return <FaGift className="category-icon" />;
+      default:
+        return <FaGlobe className="category-icon" />;
+    }
   };
 
   const filteredServices = services.filter(service => {
@@ -102,7 +126,7 @@ function Services() {
                 className={`category-btn-premium ${filters.category === (cat.id === 'all' ? '' : cat.id) ? 'active' : ''}`}
                 onClick={() => handleFilterChange('category', cat.id === 'all' ? '' : cat.id)}
               >
-                <span className="category-icon-premium">{cat.icon}</span>
+                <span className="category-icon-premium">{getCategoryIcon(cat.id)}</span>
                 <span className="category-text-premium">{cat.title}</span>
                 {filters.category === (cat.id === 'all' ? '' : cat.id) && <div className="active-indicator"></div>}
               </button>

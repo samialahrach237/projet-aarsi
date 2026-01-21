@@ -1,29 +1,28 @@
 /* src/Styles/Services.css */
 
 .services-page {
-  background-color: var(--color-bg-soft);
+  background-color: #ffffff;
   min-height: 100vh;
   padding-bottom: 100px;
 }
 
 /* --- Premium Services Header --- */
 .services-header-premium {
-  background: var(--color-white);
-  padding: 60px 20px 30px;
+  background: #ffffff;
+  padding: 25px 20px 15px;
   text-align: center;
-  border-bottom: 1px solid var(--color-border-light);
 }
 
 .page-title-premium {
   font-size: 2.4rem;
   font-weight: 800;
   color: var(--color-text-main);
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   letter-spacing: -0.02em;
 }
 
 .search-bar-container-premium {
-  margin-bottom: 40px;
+  margin-bottom: 5px;
   display: flex;
   justify-content: center;
 }
@@ -77,15 +76,31 @@
   font-size: 1.7rem;
 }
 
+.category-icon {
+  font-size: 1.4rem;
+  width: 100%;
+  height: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  transition: color 0.3s ease;
+}
+
+.category-btn-premium.active .category-icon {
+  color: var(--color-gold);
+}
+
 .category-text-premium {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--color-text-muted);
+  color: #000000;
   white-space: nowrap;
+  transition: color 0.3s ease;
 }
 
 .category-btn-premium.active .category-text-premium {
-  color: var(--color-text-main);
+  color: var(--color-gold);
   font-weight: 700;
 }
 
@@ -95,7 +110,7 @@
   left: 15%;
   right: 15%;
   height: 2.5px;
-  background: var(--color-text-main);
+  background: var(--color-gold);
   border-radius: 2px;
 }
 
@@ -105,7 +120,7 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   max-width: 1300px;
-  margin: 40px auto 0;
+  margin: 20px auto 0;
   padding: 0 24px;
   position: relative;
   z-index: 10;
@@ -121,9 +136,9 @@
 
 .service-card {
   background: var(--color-white);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   border: 1px solid var(--color-border-light);
   display: flex;
@@ -139,7 +154,7 @@
 
 /* --- Gallery Image Styling --- */
 .card-image {
-  height: 210px;
+  height: 170px;
   width: 100%;
   position: relative;
   overflow: hidden;
@@ -175,7 +190,7 @@
 }
 
 .card-content {
-  padding: 20px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
   flex: 1;

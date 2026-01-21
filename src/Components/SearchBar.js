@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiSearch } from "react-icons/fi";
 import "../Styles/SearchBar.css";
 
 function SearchBar({ 
@@ -25,9 +26,9 @@ function SearchBar({
   
   return (
     <div className="premium-search-wrapper">
-      <form className="wedding-search-bar" onSubmit={(e) => e.preventDefault()}>
-        <div className="search-box-container">
-          <div className="search-group">
+      <form className="search-bar-container" onSubmit={(e) => e.preventDefault()}>
+        <div className="search-inputs-wrapper">
+          <div className="search-dropdown-wrapper">
             <select 
               className="search-select"
               value={categoryValue}
@@ -45,9 +46,9 @@ function SearchBar({
             </select>
           </div>
 
-          <div className="search-divider"></div>
+          <div className="search-spacing"></div>
 
-          <div className="search-group">
+          <div className="search-dropdown-wrapper">
             <select 
               className="search-select"
               value={cityValue}
@@ -59,11 +60,11 @@ function SearchBar({
               ))}
             </select>
           </div>
-        </div>
 
-        <button type="submit" className="search-submit-circle">
-          <span className="search-icon-glass">🔍</span>
-        </button>
+          <button type="submit" className="search-submit-button">
+            <FiSearch className="search-icon" />
+          </button>
+        </div>
       </form>
     </div>
   );
