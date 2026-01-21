@@ -26,6 +26,7 @@
   margin-bottom: 40px;
   display: flex;
   justify-content: center;
+  width: 100%;
 }
 
 .category-bar-premium {
@@ -232,6 +233,17 @@
   border-top: 1px solid var(--color-border-light);
 }
 
+.price-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
 .price-tag {
   color: var(--color-text-main);
   font-weight: 800;
@@ -253,6 +265,7 @@
 .view-details-btn:hover {
   background-color: var(--color-gold);
   color: var(--color-white);
+  border-color: var(--color-gold);
 }
 
 /* --- Responsive Adjustments --- */

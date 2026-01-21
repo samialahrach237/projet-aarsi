@@ -24,16 +24,17 @@ function SearchBar({
   };
   
   return (
-    <div className="premium-search-wrapper">
-      <form className="wedding-search-bar" onSubmit={(e) => e.preventDefault()}>
-        <div className="search-box-container">
-          <div className="search-group">
+    <div className="modern-search-wrapper">
+      <form className="modern-search-bar" onSubmit={handleSearch}>
+        <div className="search-fields-container">
+          <div className="search-field-group">
+           
             <select 
-              className="search-select"
+              className="modern-search-select"
               value={categoryValue}
               onChange={(e) => onCategoryChange(e.target.value)}
             >
-              <option value="">Catégorie de service</option>
+              <option value="">Type de service</option>
               {categories.map(cat => {
                 const id = typeof cat === 'object' ? cat.id : cat;
                 const title = typeof cat === 'object' ? cat.title : cat;
@@ -45,15 +46,16 @@ function SearchBar({
             </select>
           </div>
 
-          <div className="search-divider"></div>
+          <div className="search-field-separator">|</div>
 
-          <div className="search-group">
+          <div className="search-field-group">
+            
             <select 
-              className="search-select"
+              className="modern-search-select"
               value={cityValue}
               onChange={(e) => onCityChange(e.target.value)}
             >
-              <option value="">Ville</option>
+              <option value="">Ville ou région</option>
               {cities.map(city => (
                 <option key={city} value={city}>{city}</option>
               ))}
@@ -61,8 +63,9 @@ function SearchBar({
           </div>
         </div>
 
-        <button type="submit" className="search-submit-circle">
-          <span className="search-icon-glass">🔍</span>
+        <button type="submit" className="search-submit-button">
+          <span className="search-icon">🔍</span>
+          
         </button>
       </form>
     </div>

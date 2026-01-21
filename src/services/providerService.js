@@ -1,6 +1,33 @@
 // Shared service for managing providers
 // This simulates a backend API - replace with real API calls later
 
+// Utility functions for categories and cities
+export const getAllCategories = () => [
+  { id: 'all', title: 'Tous les services' },
+  { id: 'Photographe', title: 'Photographe' },
+  { id: 'Negafa', title: 'Negafa' },
+  { id: 'Maquilleur', title: 'Maquilleur' },
+  { id: 'Coiffeur', title: 'Coiffeur' },
+  { id: 'Traiteur', title: 'Traiteur' },
+  { id: 'Décorateur', title: 'Décorateur' },
+  { id: 'Fleuriste', title: 'Fleuriste' },
+  { id: 'DJ', title: 'DJ' },
+  { id: 'Location', title: 'Location de matériel' }
+];
+
+export const getUniqueCities = () => [
+  'Casablanca',
+  'Rabat', 
+  'Marrakech',
+  'Fès',
+  'Tanger',
+  'Agadir',
+  'Meknès',
+  'Oujda',
+  'Kenitra',
+  'Tétouan'
+];
+
 class ProviderService {
   constructor() {
     this.storageKey = 'aarssi_providers';

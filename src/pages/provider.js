@@ -1,18 +1,12 @@
-<<<<<<< HEAD
 import React, { useState } from "react";
-=======
-import { useState } from "react";
->>>>>>> 18cd2ca8d8b197595f102e1a488b60b248518887
 import { useNavigate } from "react-router-dom";
-import providerService from "../services/providerService";
+import providerService, { getAllCategories, getUniqueCities } from "../services/providerService";
 import "../Styles/Provider.css";
 
 function Provider() {
-<<<<<<< HEAD
+
   const [categories] = useState(getAllCategories());
   const [cities] = useState(getUniqueCities());
-=======
->>>>>>> 18cd2ca8d8b197595f102e1a488b60b248518887
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     profileName: "",
@@ -103,7 +97,7 @@ function Provider() {
         <p className="provider-subtitle">Rejoignez l'élite du mariage en quelques clics</p>
       </div>
 
-<<<<<<< HEAD
+
       <div className="provider-form-container">
         <div className="multi-step-container">
           {/* Progress Bar */}
@@ -253,14 +247,6 @@ function Provider() {
             <li>✅ Visibilité accrue pour votre business</li>
             <li>✅ Système d'avis et de notation</li>
           </ul>
-=======
-      <div className="multi-step-container">
-        {/* Progress Bar */}
-        <div className="progress-bar">
-          <div className={`progress-step ${step >= 1 ? "active" : ""}`}>1. Informations</div>
-          <div className={`progress-line ${step >= 2 ? "active" : ""}`}></div>
-          <div className={`progress-step ${step >= 2 ? "active" : ""}`}>2. Détails & Media</div>
->>>>>>> 18cd2ca8d8b197595f102e1a488b60b248518887
         </div>
       </div>
     </div>

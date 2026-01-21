@@ -25,11 +25,30 @@
   gap: 12px;
 }
 
-.logo {
+.logo-symbol {
+  width: 48px;
   height: 48px;
-  width: auto;
-  border-radius: 10px;
-  transition: transform 0.3s ease;
+  background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+  transition: all 0.3s ease;
+}
+
+.logo-symbol:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.3);
+}
+
+.logo-initial {
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-family: 'Playfair Display', serif;
+  letter-spacing: 1px;
 }
 
 .brand-name {

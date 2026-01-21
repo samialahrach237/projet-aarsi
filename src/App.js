@@ -21,6 +21,7 @@ import Admin from "./pages/Admin"; // صفحة Admin
 import AdminLogin from "./pages/AdminLogin"; // صفحة تسجيل دخول Admin
 import Avis from "./pages/Avis";
 import Connexion from "./pages/Connexion";
+import Reservation from "./pages/Reservation"; // صفحة Reservation
 import NotFound from "./pages/error"; // صفحة 404
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
         <Route path="/" element={<Accueil />} />
         <Route path="/services" element={<Services />} />
         <Route path="/service/:id" element={<ProviderProfile />} />
+        <Route path="/reservation/:id" element={<Reservation />} />
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
         <Route path="/provider" element={<Provider />} />
