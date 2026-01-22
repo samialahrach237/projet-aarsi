@@ -1,6 +1,6 @@
 .connexion-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8f4ec 0%, #fff 100%);
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -9,26 +9,27 @@
 }
 
 .connexion-container {
-  padding: 30px 25px;
+  padding: 15px 15px;
   width: 100%;
-  max-width: 400px;
+  max-width: 360px;
   font-family: 'Poppins', sans-serif;
-  border: 1px solid #f0f0f0;
-  border-radius: 15px;
+  border: 1px solid   #b7a26b;
+  border-radius: 10px;
   background: #ffffff;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6px 25px rgba(200, 155, 60, 0.2);
+  
 }
 
 .connexion-container h2 {
   text-align: center;
   color: #9c7c3a;
-  margin-bottom: 25px;
-  font-size: 24px;
+  margin-bottom: 15px;
+  font-size: 20px;
   font-family: 'Playfair Display', serif;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .form-group label {
@@ -41,50 +42,52 @@
 
 .form-input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 6px 10px;
   border: 1.5px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 5px;
+  font-size: 12px;
   transition: all 0.3s ease;
   box-sizing: border-box;
+  box-shadow: 0 0 0 1px #ffffff inset;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #c89b3c;
-  box-shadow: 0 0 0 3px rgba(200, 155, 60, 0.1);
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
 }
 
 .form-select {
   width: 100%;
-  padding: 10px 14px;
+  padding: 6px 10px;
   border: 1.5px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 5px;
+  font-size: 12px;
   background-color: white;
   cursor: pointer;
   transition: all 0.3s ease;
   box-sizing: border-box;
+  box-shadow: 0 0 0 1px #ffffff inset;
 }
 
 .form-select:focus {
   outline: none;
-  border-color: #c89b3c;
-  box-shadow: 0 0 0 3px rgba(200, 155, 60, 0.1);
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
 }
 
 .btn-connexion {
   width: 100%;
-  padding: 12px;
+  padding: 8px;
   background: #c89b3c;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 15px;
+  border-radius: 5px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 15px;
+  margin-top: 10px;
 }
 
 .btn-connexion:hover {
@@ -95,4 +98,152 @@
 
 .btn-connexion:active {
   transform: translateY(0);
+}
+
+.divider {
+  text-align: center;
+  margin: 15px 0;
+  position: relative;
+  color: #999;
+  font-size: 12px;
+}
+
+.divider:before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #ddd;
+  z-index: 1;
+}
+
+.divider span {
+  position: relative;
+  background: white;
+  z-index: 2;
+  padding: 0 10px;
+  color: #666;
+}
+
+.btn-register {
+  width: 100%;
+  padding: 8px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.btn-register:hover {
+  background: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.btn-register:active {
+  transform: translateY(0);
+}
+
+.form-switch {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.form-switch p {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.switch-link {
+  color: #c89b3c;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.switch-link:hover {
+  color: #b08830;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .connexion-container {
+    max-width: 320px;
+    padding: 12px 12px;
+  }
+  
+  .connexion-container h2 {
+    font-size: 18px;
+  }
+  
+  .form-input,
+  .form-select {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+  
+  .btn-connexion,
+  .btn-register {
+    padding: 7px;
+    font-size: 12px;
+  }
+  
+  .form-group label {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .connexion-page {
+    padding: 15px;
+  }
+  
+  .connexion-container {
+    max-width: 280px;
+    padding: 10px 10px;
+  }
+  
+  .connexion-container h2 {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .form-input,
+  .form-select {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+  
+  .btn-connexion,
+  .btn-register {
+    padding: 6px;
+    font-size: 11px;
+  }
+  
+  .form-group {
+    margin-bottom: 8px;
+  }
+  
+  .form-group label {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+  
+  .divider {
+    font-size: 11px;
+    margin: 12px 0;
+  }
+  
+  .btn-connexion,
+  .btn-register {
+    margin-top: 8px;
+  }
 }

@@ -21,6 +21,7 @@ import Admin from "./pages/Admin"; // صفحة Admin
 import AdminLogin from "./pages/AdminLogin"; // صفحة تسجيل دخول Admin
 import Avis from "./pages/Avis";
 import Connexion from "./pages/Connexion";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/error"; // صفحة 404
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/avis" element={<Avis />} />
         <Route path="/connexion" element={<Connexion />} />
+        <Route path="/contact" element={<Contact />} />
         {/* Catch-all route for 404 - must be last */}
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -21,7 +21,7 @@ function Accueil() {
               Lancez une recherche
             </Link>
             <p className="organizer-subtext">
-              Êtes-vous un prestataire? <Link to="/contact">Rejoignez-nous ici!</Link>
+              Êtes-vous un prestataire? <Link to="/connexion">Rejoignez-nous ici!</Link>
             </p>
           </div>
 

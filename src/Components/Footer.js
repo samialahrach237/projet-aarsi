@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "../Styles/Footer.css";
 
 
@@ -8,32 +9,32 @@ function Footer() {
         {/* Column 1 */}
         <div className="footer-col">
           <h4>AARSSI</h4>
-          <p>About Us</p>
-          <p>Our Story</p>
-          <p>Mission</p>
-          <p>Careers</p>
+          <p>À propos de nous</p>
+          <p> Notre histoire</p>
+          <p>Notre mission</p>
+          <p>Carrière</p>
         </div>
 
         {/* Column 2 */}
         <div className="footer-col">
-          <h4>Legal & Support</h4>
-          <p>Terms</p>
-          <p>Privacy Policy</p>
-          <p>Cookie Policy</p>
-          <p>Help Center</p>
+          <h4>Mentions légales & Support</h4>
+          <p>Conditions</p>
+          <p>Politique de confidentialité</p>
+          <p>Politique de cookies</p>
+          <p>Centre d’aide</p>
         </div>
 
         {/* Column 3 */}
         <div className="footer-col">
           <h4>Contact</h4>
-          <p className="link">Contact Us</p>
+          <Link to="/contact" className="footer-link">Contactez-nous</Link>
           <p>FAQ</p>
-          <p>Partnerships</p>
+          <p>Partenariats</p>
         </div>
 
         {/* Column 4 */}
         <div className="footer-col">
-          <h4>Follow Us</h4>
+           <h4>Suivez-nous</h4>
           <div className="social-icons">
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon facebook">
               <i className="fab fa-facebook-f"></i>
