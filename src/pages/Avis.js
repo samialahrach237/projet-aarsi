@@ -1,4 +1,4 @@
-import "../Styles/Accueil.css"; // نعيد استخدام الأنماط العامة
+import "../Styles/Accueil.css";
 
 function Avis() {
   const reviews = [

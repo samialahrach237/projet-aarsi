@@ -28,7 +28,7 @@ function SearchBar({
       <form className="modern-search-bar" onSubmit={handleSearch}>
         <div className="search-fields-container">
           <div className="search-field-group">
-           
+            <div className="field-icon">📋</div>
             <select 
               className="modern-search-select"
               value={categoryValue}
@@ -49,7 +49,7 @@ function SearchBar({
           <div className="search-field-separator">|</div>
 
           <div className="search-field-group">
-            
+            <div className="field-icon">📍</div>
             <select 
               className="modern-search-select"
               value={cityValue}
@@ -65,7 +65,7 @@ function SearchBar({
 
         <button type="submit" className="search-submit-button">
           <span className="search-icon">🔍</span>
-          
+          <span className="search-text">Rechercher</span>
         </button>
       </form>
     </div>

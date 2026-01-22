@@ -4,7 +4,6 @@ import providerService, { getAllCategories, getUniqueCities } from "../services/
 import "../Styles/Provider.css";
 
 function Provider() {
-
   const [categories] = useState(getAllCategories());
   const [cities] = useState(getUniqueCities());
   const [step, setStep] = useState(1);
@@ -96,7 +95,6 @@ function Provider() {
         <h1 className="provider-title">Espace Provider</h1>
         <p className="provider-subtitle">Rejoignez l'élite du mariage en quelques clics</p>
       </div>
-
 
       <div className="provider-form-container">
         <div className="multi-step-container">

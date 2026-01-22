@@ -6,12 +6,13 @@ function UserDashboard() {
 
   // بيانات وهمية تحاكي الشريحة 11
   const bookings = [
-    { id: 1, service: "Bridal Makeup Package", provider: "Zhor Makeup", date: "25 Oct 2025", time: "10:00 AM", status: "confirmed", image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=300" },
-    { id: 2, service: "Wedding Photography", provider: "Simo Photo", date: "12 Nov 2025", time: "14:00 PM", status: "pending", image: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?auto=format&fit=crop&w=300" }
+    { id: 1, service: "Makeup Package", provider: "bahija", date: "25 Oct 2026", time: "10:00 AM", status: "confirmed", image: "/images/photograph2.jpg" },
+    { id: 2, service: "Makeup Package", provider: "OUMAYMA", date: "17 Oct 2026", time: "22:00 AM", status: "confirmed", image: "/images/nagafa1.jpg" },
+    { id: 2, service: "Wedding Photography", provider: "", date: "12 Nov 2026", time: "14:00 PM", status: "pending", image: "/images/nagafa2.jpg" }
   ];
 
   const pastBookings = [
-     { id: 3, service: "Caftan Rental", provider: "Fatima Caftan", date: "10 Jan 2024", status: "completed", image: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=300" }
+    { id: 3, service: "Caftan Rental", provider: "Fatima Caftan", date: "10 Jan 2024", status: "completed", image: "/images/photograph2.jpg" }
   ];
 
   return (
@@ -24,25 +25,25 @@ function UserDashboard() {
           className={`dash-tab ${activeTab === 'upcoming' ? 'active' : ''}`}
           onClick={() => setActiveTab('upcoming')}
         >
-          📅 À Venir
+          À Venir
         </button>
         <button 
           className={`dash-tab ${activeTab === 'past' ? 'active' : ''}`}
           onClick={() => setActiveTab('past')}
         >
-          📜 Historique
+          Historique
         </button>
         <button 
           className={`dash-tab ${activeTab === 'favorites' ? 'active' : ''}`}
           onClick={() => setActiveTab('favorites')}
         >
-          ❤️ Favoris
+           Favoris
         </button>
         <button 
           className={`dash-tab ${activeTab === 'settings' ? 'active' : ''}`}
           onClick={() => setActiveTab('settings')}
         >
-          ⚙️ Paramètres
+           Paramètres
         </button>
       </div>
 
@@ -59,8 +60,8 @@ function UserDashboard() {
                   <h3>{booking.service}</h3>
                   <p className="provider-name">Avec: {booking.provider}</p>
                   <div className="booking-meta">
-                    <span>📅 {booking.date}</span>
-                    <span>⏰ {booking.time}</span>
+                    <span> {booking.date}</span>
+                    <span> {booking.time}</span>
                   </div>
                   <span className={`status-badge ${booking.status}`}>{booking.status}</span>
                 </div>
