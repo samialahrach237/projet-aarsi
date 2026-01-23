@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiSearch } from "react-icons/fi";
+import { FaSearch } from "react-icons/fa";
 import "../Styles/SearchBar.css";
 
 function SearchBar({ 
@@ -25,16 +25,17 @@ function SearchBar({
   };
   
   return (
-    <div className="premium-search-wrapper">
-      <form className="search-bar-container" onSubmit={(e) => e.preventDefault()}>
-        <div className="search-inputs-wrapper">
-          <div className="search-dropdown-wrapper">
+    <div className="modern-search-wrapper">
+      <form className="modern-search-bar" onSubmit={handleSearch}>
+        <div className="search-fields-container">
+          <div className="search-field-group">
+            <div className="field-icon">📋</div>
             <select 
-              className="search-select"
+              className="modern-search-select"
               value={categoryValue}
               onChange={(e) => onCategoryChange(e.target.value)}
             >
-              <option value="">Catégorie de service</option>
+              <option value="">Type de service</option>
               {categories.map(cat => {
                 const id = typeof cat === 'object' ? cat.id : cat;
                 const title = typeof cat === 'object' ? cat.title : cat;
@@ -46,25 +47,26 @@ function SearchBar({
             </select>
           </div>
 
-          <div className="search-spacing"></div>
+          <div className="search-field-separator">|</div>
 
-          <div className="search-dropdown-wrapper">
+          <div className="search-field-group">
+            <div className="field-icon">📍</div>
             <select 
-              className="search-select"
+              className="modern-search-select"
               value={cityValue}
               onChange={(e) => onCityChange(e.target.value)}
             >
-              <option value="">Ville</option>
+              <option value="">Ville ou région</option>
               {cities.map(city => (
                 <option key={city} value={city}>{city}</option>
               ))}
             </select>
           </div>
-
-          <button type="submit" className="search-submit-button">
-            <FiSearch className="search-icon" />
-          </button>
         </div>
+
+        <button type="submit" className="search-submit-button">
+          <FaSearch className="search-icon" />
+        </button>
       </form>
     </div>
   );

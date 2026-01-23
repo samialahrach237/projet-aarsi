@@ -21,6 +21,10 @@ function ProviderProfile() {
     setService(serviceData);
   }, [id, navigate]);
 
+  const handleReservation = () => {
+    navigate(`/reservation/${id}`);
+  };
+
   if (!service) {
     return (
       <div className="profile-page">
@@ -49,7 +53,7 @@ function ProviderProfile() {
         <div className="info-stats">
           <div className="stat-item">
             <span className="stars">{"★".repeat(Math.floor(service.rating))}</span>
-            <span className="rating-text">{service.rating} ({service.reviews} Avis)</span>
+            <span className="rating-text">{service.rating} ({service.reviews || '50+'} Avis)</span>
           </div>
           <div className="stat-divider"></div>
           <div className="stat-item">
@@ -58,7 +62,9 @@ function ProviderProfile() {
           </div>
         </div>
 
-        <button className="book-now-btn">RÉSERVER MAINTENANT</button>
+        <button className="book-now-btn" onClick={handleReservation}>
+          RÉSERVER MAINTENANT
+        </button>
       </div>
 
       {/* 3. Main Content Container */}
@@ -89,7 +95,9 @@ function ProviderProfile() {
           <div className="details-section">
             <div className="description-container">
               <h2 className="section-title">À propos de ce service</h2>
-              <p className="description-text">{service.description}</p>
+              <p className="description-text">
+                {service.description || "Découvrez nos services exceptionnels pour rendre votre événement spécial et inoubliable. Notre équipe d'experts s'engage à fournir un service de qualité supérieure adapté à vos besoins spécifiques."}
+              </p>
             </div>
             
             <div className="info-grid-premium">
@@ -141,6 +149,11 @@ function ProviderProfile() {
                 loading="lazy"
                 title="Google Maps Location"
               ></iframe>
+              <div className="address-info">
+                <h3>Adresse</h3>
+                <p>{service.address || `${service.city}, Maroc`}</p>
+                <p>Téléphone: {service.phone || "+212 XX XX XX XX"}</p>
+              </div>
             </div>
           </div>
         )}

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import providerService from "../services/providerService";
+import providerService, { getAllCategories, getUniqueCities } from "../services/providerService";
 import "../Styles/Provider.css";
-import { getAllCategories, getUniqueCities } from "../data/serviceRepo";
 
 function Provider() {
   const [categories] = useState(getAllCategories());
@@ -62,7 +61,7 @@ function Provider() {
 
   const prevStep = () => setStep(1);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.service || !formData.city) {
         alert("Veuillez sélectionner un service et une ville.");
@@ -71,7 +70,7 @@ function Provider() {
     setIsSubmitting(true);
     
     try {
-      providerService.createProvider({
+      await providerService.createProvider({
         name: formData.profileName,
         email: formData.email,
         service: formData.service,

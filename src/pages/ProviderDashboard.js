@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   MdDashboard, MdPhotoLibrary, MdLayers, MdCalendarMonth, 
-  MdAssignment, MdPayments, MdAccountCircle, MdLogout, MdCloudUpload, MdStar, MdDelete, MdSave
+  MdAssignment, MdPayments, MdAccountCircle, MdCloudUpload, MdStar, MdDelete, MdSave
 } from "react-icons/md";
 import "../Styles/ProviderDashboard.css";
 

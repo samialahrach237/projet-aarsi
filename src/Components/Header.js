@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import logo from "../Assets/logo/logo.png";
+import logoImage from "../Assets/logo/logo.png";
+
 import "../Styles/Header.css";
 
 function Header() {
@@ -21,7 +22,9 @@ function Header() {
       <div className="header-container">
         <div className="header-left">
           <Link to="/" className="logo-link">
-            <img src={logo} alt="AARSSI Logo" className="logo" />
+            <div className="logo-symbol">
+              <img src={logoImage} alt="AARSSI Logo" className="logo-image" />
+            </div>
             <span className="brand-name">AARSSI</span>
           </Link>
         </div>
