@@ -63,13 +63,7 @@ function Avis() {
     }
   ]);
   
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewForm, setReviewForm] = useState({
-    platform: '',
-    provider: '',
-    rating: 0,
-    review: ''
-  });
+
   
   const navigate = useNavigate();
 
@@ -89,17 +83,13 @@ function Avis() {
     return comment.substring(0, maxLength) + '...';
   };
 
-  // Mock prestataire data for testing
-  const mockPrestataires = [
-    { id: 'photographe1', name: 'Photographe Pro' },
-    { id: 'dj1', name: 'DJ Animation' },
-    { id: 'traiteur1', name: 'Traiteur Gourmet' },
-    { id: 'bijoutier1', name: 'Bijouterie Elites' },
-    { id: 'negafa1', name: 'Coiffeur Negafa' },
-    { id: 'salle1', name: 'Salle de Fête Luxe' },
-    { id: 'tyafer1', name: 'Tyafer Marocain' },
-  ];
-
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewForm, setReviewForm] = useState({
+    platform: 'platform-AARSSI',
+    rating: 5,
+    review: ''
+  });
+  
   const handleLeaveReview = () => {
     // Check if user is logged in (using localStorage for testing)
     const isLoggedIn = localStorage.getItem('userToken') !== null;
@@ -125,16 +115,6 @@ function Avis() {
     e.preventDefault();
     
     // Validation
-    if (!reviewForm.platform) {
-      alert('Veuillez sélectionner une option');
-      return;
-    }
-    
-    if (reviewForm.platform === '#prestataire-AARSSI' && !reviewForm.provider) {
-      alert('Veuillez sélectionner un prestataire');
-      return;
-    }
-    
     if (!reviewForm.rating) {
       alert('Veuillez donner une note');
       return;
@@ -153,7 +133,7 @@ function Avis() {
       id: Date.now(), // Use timestamp for unique ID
       name: userData.email ? userData.email.split('@')[0] : 'Utilisateur', // Extract name from email
       city: "Maroc", // Default city, could be enhanced later
-      profile: reviewForm.platform.includes('prestataire') ? "Prestataire" : "Client", // Determine profile based on selection
+      profile: "Client", // Default profile
       comment: reviewForm.review,
       rating: reviewForm.rating,
       profilePhoto: "https://randomuser.me/api/portraits/lego/1.jpg" // Default profile photo
@@ -165,14 +145,14 @@ function Avis() {
     // Handle form submission
     console.log('Review submitted:', reviewForm);
     // Reset form and close modal
-    setReviewForm({ platform: '', provider: '', rating: 0, review: '' });
+    setReviewForm({ platform: 'platform-AARSSI', rating: 5, review: '' });
     setShowReviewModal(false);
     
     alert('Votre avis a été soumis avec succès !');
   };
   
   const handleCloseModal = () => {
-    setReviewForm({ platform: '', provider: '', rating: 0, review: '' });
+    setReviewForm({ platform: 'platform-AARSSI', rating: 5, review: '' });
     setShowReviewModal(false);
   };
 
@@ -230,57 +210,25 @@ function Avis() {
       {showReviewModal && (
         <div className="review-modal-overlay" onClick={handleCloseModal}>
           <div className="review-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="form-header">
+        
+            
+            <form className="review-form" onSubmit={handleSubmitReview}>
+              <div className="form-group">
+                    <div className="form-header">
               <div className="form-title">
                 <h2>Laisser un avis</h2>
               </div>
               <button type="button" className="form-reduire-icon" onClick={handleCloseModal} aria-label="Fermer">×</button>
             </div>
-            <form className="review-form" onSubmit={handleSubmitReview}>
-              <div className="form-group-radio">
-                <label htmlFor="platform" className="radio-label">Sélectionnez une option:</label>
-                <div className="radio-options">
-                  <label>
-                    <input 
-                      type="radio" 
-                      name="platform" 
-                      value="#platform-AARSSI"
-                      checked={reviewForm.platform === '#platform-AARSSI'}
-                      onChange={(e) => handleFormChange('platform', e.target.value)}
-                    />
-                    #platform-AARSSI
-                  </label>
-                  <label>
-                    <input 
-                      type="radio" 
-                      name="platform" 
-                      value="#prestataire-AARSSI"
-                      checked={reviewForm.platform === '#prestataire-AARSSI'}
-                      onChange={(e) => handleFormChange('platform', e.target.value)}
-                    />
-                    #prestataire-AARSSI
-                  </label>
-                </div>
+                <label htmlFor="platform">Plateforme:</label>
+                <input
+                  type="text"
+                  id="platform"
+                  value={reviewForm.platform}
+                  readOnly
+                  className="form-input-read-only"
+                />
               </div>
-              
-              {reviewForm.platform === '#prestataire-AARSSI' && (
-              <div className="form-group">
-                <label htmlFor="provider">Sélectionnez un prestataire:</label>
-                <select 
-                  id="provider"
-                  value={reviewForm.provider}
-                  onChange={(e) => handleFormChange('provider', e.target.value)}
-                  required
-                >
-                  <option value="">Choisissez un prestataire</option>
-                  {mockPrestataires.map(prestataire => (
-                    <option key={prestataire.id} value={prestataire.id}>
-                      {prestataire.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              )}
               
               <div className="form-group">
                 <label htmlFor="rating">Votre avis (Notez sur 5 étoiles):</label>
@@ -315,7 +263,7 @@ function Avis() {
                   Annuler
                 </button>
                 <button type="submit" className="submit-btn">
-                  Soumettre votre avis
+                  Publiée
                 </button>
               </div>
             </form>

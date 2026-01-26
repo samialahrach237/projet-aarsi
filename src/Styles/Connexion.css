@@ -9,9 +9,9 @@
 }
 
 .connexion-container {
-  padding: 15px 15px;
+  padding: 10px 10px;
   width: 100%;
-  max-width: 360px;
+  max-width: 340px;
   font-family: 'Poppins', sans-serif;
   border: 1px solid   #b7a26b;
   border-radius: 10px;
@@ -23,13 +23,13 @@
 .connexion-container h2 {
   text-align: center;
   color: #9c7c3a;
-  margin-bottom: 15px;
-  font-size: 20px;
+  margin-bottom: 10px;
+  font-size: 18px;
   font-family: 'Playfair Display', serif;
 }
 
 .form-group {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .form-group label {
@@ -78,16 +78,16 @@
 
 .btn-connexion {
   width: 100%;
-  padding: 8px;
+  padding: 12px;
   background: #c89b3c;
   color: white;
   border: none;
   border-radius: 5px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .btn-connexion:hover {
@@ -153,7 +153,7 @@
 
 .form-switch {
   text-align: center;
-  margin-top: 15px;
+  margin-top: 10px;
 }
 
 .form-switch p {

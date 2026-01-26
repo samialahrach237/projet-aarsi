@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   MdDashboard, MdPhotoLibrary, MdLayers, MdCalendarMonth, 
-  MdAssignment, MdPayments, MdAccountCircle, MdCloudUpload, MdStar, MdDelete, MdSave
+  MdAssignment, MdPayments, MdAccountCircle, MdCloudUpload, MdStar, MdDelete, MdSave, MdLogout
 } from "react-icons/md";
 import "../Styles/ProviderDashboard.css";
 
@@ -40,6 +40,12 @@ function ProviderDashboard() {
     sessionStorage.removeItem("isProviderAuthenticated");
     navigate("/connexion");
   };
+  
+  const handleDeconnexion = () => {
+    // Clear any provider authentication
+    sessionStorage.removeItem("isProviderAuthenticated");
+    navigate("/");
+  };
 
   const setPrimary = (id) => {
     setImages(images.map(img => ({
@@ -74,6 +80,16 @@ function ProviderDashboard() {
   };
 
   const handleProfileImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileData(prev => ({
+        ...prev,
+        profileImage: URL.createObjectURL(file)
+      }));
+    }
+  };
+  
+  const handleTopbarAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       setProfileData(prev => ({
@@ -119,7 +135,7 @@ function ProviderDashboard() {
             </div>
 
             <div className="gallery-header">
-              <p>Primary image will be featured first on your public profile carousel. Changes are immediately reflected via API.</p>
+              
             </div>
 
             <div className="photos-grid">
@@ -155,29 +171,29 @@ function ProviderDashboard() {
           <div className="dashboard-view-content animate-fade-in">
             <div className="profile-edit-container card-box">
               <div className="card-header">
-                <h2>Modifier le Profil</h2>
-                <p>Gérez les informations publiques de votre service</p>
+              
               </div>
               <form className="profile-edit-form" onSubmit={handleProfileSubmit}>
                 <div className="profile-image-upload-section">
-                  <div className="profile-image-wrapper">
-                    <img src={profileData.profileImage} alt="Profile" className="profile-edit-avatar" />
-                    <label htmlFor="profile-upload" className="profile-upload-btn">
-                      <MdCloudUpload />
-                      <input 
-                        type="file" 
-                        id="profile-upload" 
-                        hidden 
-                        accept="image/*" 
-                        onChange={handleProfileImageUpload}
-                      />
-                    </label>
-                  </div>
-                  <div className="profile-image-text">
-                    <h3>Photo de profil</h3>
-                    <p>Cette image sera visible par vos clients.</p>
-                  </div>
-                </div>
+                 <div className="avatar-wrapper-large">
+                   <img src={profileData.profileImage} alt="Profile" className="profile-photo-large" />
+                   <label htmlFor="profile-upload" className="avatar-overlay-large">
+                     <MdCloudUpload className="camera-icon" />
+                     <input 
+                       type="file" 
+                       id="profile-upload" 
+                       hidden 
+                       accept="image/*" 
+                       onChange={handleProfileImageUpload}
+                     />
+                   </label>
+                 </div>
+                 <div className="profile-image-text">
+                   
+                   
+                 </div>
+               </div>
+              
 
                 <div className="form-grid">
                   <div className="form-group">
@@ -244,7 +260,7 @@ function ProviderDashboard() {
       {/* Sidebar */}
       <aside className="dashboard-sidebar">
         <div className="sidebar-logo-container">
-          <h1 className="logo-text">AARSSI<span>*</span></h1>
+          <h1 className="logo-text">AAR<span>SSI</span></h1>
         </div>
         
         <nav className="sidebar-nav">
@@ -290,18 +306,36 @@ function ProviderDashboard() {
           >
             <MdAccountCircle /> Profile
           </button>
+          <button 
+            className="nav-item"
+            onClick={handleDeconnexion}
+          >
+            <MdLogout /> Déconnexion
+          </button>
         </nav>
       </aside>
 
       {/* Main Content Area */}
       <main className="dashboard-main">
         <header className="dashboard-topbar">
-          <div className="topbar-right">
-            <div className="user-profile-summary">
-              <span className="user-name">{profileData.name}</span>
+          <div className="user-profile-summary">
+            <div className="avatar-wrapper">
               <img src={profileData.profileImage} alt="Avatar" className="user-avatar" />
+              <label htmlFor="topbar-avatar-upload" className="avatar-overlay">
+                <MdCloudUpload className="camera-icon" />
+                <input 
+                  type="file" 
+                  id="topbar-avatar-upload" 
+                  hidden 
+                  accept="image/*" 
+                  onChange={handleTopbarAvatarUpload}
+                />
+              </label>
             </div>
-            <button className="logout-btn" onClick={handleLogout}>LOGOUT</button>
+            <div className="user-info">
+              <span className="user-name">{profileData.name}</span>
+              <span className="user-city">{profileData.city}</span>
+            </div>
           </div>
         </header>
 

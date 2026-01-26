@@ -1,121 +1,392 @@
 import React, { useState } from 'react';
+import { FaHome, FaHistory, FaUser, FaSignOutAlt, FaCamera, FaEdit, FaCalendarAlt, FaClock, FaCheck, FaEllipsisH, FaTimes, FaCalendar, FaRegClock } from 'react-icons/fa';
 import '../Styles/UserDashboard.css';
 
 function UserDashboard() {
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [user, setUser] = useState({
+    name: 'Samia Lahrichi',
+    city: 'Casablanca',
+    avatar: null
+  });
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [showReviewForm, setShowReviewForm] = useState(null);
+  const [rating, setRating] = useState(5);
+  
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUser(prev => ({
+          ...prev,
+          avatar: e.target.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-  // بيانات وهمية تحاكي الشريحة 11
-  const bookings = [
-    { id: 1, service: "Makeup Package", provider: "bahija", date: "25 Oct 2026", time: "10:00 AM", status: "confirmed", image: "/images/photograph2.jpg" },
-    { id: 2, service: "Makeup Package", provider: "OUMAYMA", date: "17 Oct 2026", time: "22:00 AM", status: "confirmed", image: "/images/nagafa1.jpg" },
-    { id: 2, service: "Wedding Photography", provider: "", date: "12 Nov 2026", time: "14:00 PM", status: "pending", image: "/images/nagafa2.jpg" }
+  // Mock data for reservations
+  const upcomingReservations = [
+    { id: 1, service: "Salle de Réception", provider: "Palais des Mille et Une Nuits", date: "15 Mars 2024", time: "19:00", status: "Confirmé" },
+    { id: 2, service: "Photographe", provider: "Studio Lumière", date: "22 Mars 2024", time: "10:00", status: "Confirmé" },
+    { id: 3, service: "Traiteur", provider: "Saveurs Marocaines", date: "05 Avril 2024", time: "18:00", status: "En attente" }
   ];
 
-  const pastBookings = [
-    { id: 3, service: "Caftan Rental", provider: "Fatima Caftan", date: "10 Jan 2024", status: "completed", image: "/images/photograph2.jpg" }
+  const pastReservations = [
+    { id: 1, service: "Coiffeur", provider: "Salon Zineb", date: "10 Février 2024", status: "Terminé" },
+    { id: 2, service: "DJ", provider: "Sound Morocco", date: "15 Janvier 2024", status: "Terminé" }
+  ];
+
+  const menuItems = [
+    { id: 'upcoming', label: 'À Venir', icon: <FaCalendarAlt /> },
+    { id: 'history', label: 'Historique', icon: <FaHistory /> },
+    { id: 'profile', label: 'Profil', icon: <FaUser /> },
   ];
 
   return (
-    <div className="dashboard-container">
-      <h1 className="dashboard-title">Mon Tableau de Bord</h1>
-      
-      {/* Tabs Navigation (Slide 11) */}
-      <div className="dashboard-tabs">
-        <button 
-          className={`dash-tab ${activeTab === 'upcoming' ? 'active' : ''}`}
-          onClick={() => setActiveTab('upcoming')}
-        >
-          À Venir
-        </button>
-        <button 
-          className={`dash-tab ${activeTab === 'past' ? 'active' : ''}`}
-          onClick={() => setActiveTab('past')}
-        >
-          Historique
-        </button>
-        <button 
-          className={`dash-tab ${activeTab === 'favorites' ? 'active' : ''}`}
-          onClick={() => setActiveTab('favorites')}
-        >
-           Favoris
-        </button>
-        <button 
-          className={`dash-tab ${activeTab === 'settings' ? 'active' : ''}`}
-          onClick={() => setActiveTab('settings')}
-        >
-           Paramètres
-        </button>
-      </div>
-
-      {/* Content Area */}
-      <div className="dashboard-content">
+    <div className="dashboard-layout">
+      {/* Success Notification */}
+      {showSuccess && (
+        <div className="success-notification">
+          <span className="success-icon">✓</span>
+          <span className="success-message">{successMessage}</span>
+        </div>
+      )}
+      {/* Left Sidebar */}
+      <aside className="sidebar">
+        <div className="sidebar-header">
+          <h1 className="logo">AAR<span className="green-text">SSI</span></h1>
+        </div>
         
-        {/* Upcoming Bookings Tab */}
-        {activeTab === 'upcoming' && (
-          <div className="bookings-grid">
-            {bookings.map(booking => (
-              <div key={booking.id} className="booking-card">
-                <img src={booking.image} alt={booking.service} className="booking-img" />
-                <div className="booking-info">
-                  <h3>{booking.service}</h3>
-                  <p className="provider-name">Avec: {booking.provider}</p>
-                  <div className="booking-meta">
-                    <span> {booking.date}</span>
-                    <span> {booking.time}</span>
+        <nav className="sidebar-nav">
+          <ul className="nav-list">
+            {menuItems.map(item => {
+              const isLastItem = item.id === 'profile';
+              return (
+                <React.Fragment key={item.id}>
+                  <li>
+                    <button
+                      className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
+                      onClick={() => setActiveTab(item.id)}
+                    >
+                      <span className="nav-icon">{item.icon}</span>
+                      <span className="nav-label">{item.label}</span>
+                    </button>
+                  </li>
+                  {isLastItem && (
+                    <li>
+                      <button 
+                        className="nav-item logout-btn-inline"
+                        onClick={() => {
+                          localStorage.removeItem('userToken');
+                          window.location.href = '/';
+                        }}
+                      >
+                        <span className="nav-icon"><FaSignOutAlt /></span>
+                        <span className="nav-label">Déconnexion</span>
+                      </button>
+                    </li>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </ul>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main className="main-content">
+        {/* User Info Header */}
+        <header className="user-header">
+          <div className="user-avatar-container">
+            <div className="avatar-wrapper">
+              {user.avatar ? (
+                <img 
+                  src={user.avatar} 
+                  alt="Avatar utilisateur" 
+                  className="user-avatar"
+                />
+              ) : (
+                <div className="user-avatar-placeholder">
+                  <span className="placeholder-initials-header">SL</span>
+                </div>
+              )}
+              <label htmlFor="avatar-upload" className="avatar-overlay">
+                <span className="camera-icon"><FaCamera /></span>
+              </label>
+              <input 
+                type="file" 
+                id="avatar-upload" 
+                accept="image/*" 
+                onChange={handleImageUpload}
+                style={{display: 'none'}}
+              />
+            </div>
+          </div>
+          <div className="user-info">
+            <h2 className="user-name">{user.name}</h2>
+            <p className="user-city">{user.city}</p>
+            <span className="user-role">Mariée</span>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div className="content-area">
+          {activeTab === 'upcoming' && (
+            <div className="tab-content">
+            {/* Filter Buttons */}
+              <div className="filter-buttons">
+                <button 
+                  className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
+                  onClick={() => setFilterStatus('all')}
+                >
+                  Tous
+                </button>
+                <button 
+                  className={`filter-btn ${filterStatus === 'Confirmé' ? 'active' : ''}`}
+                  onClick={() => setFilterStatus('Confirmé')}
+                >
+                  Confirmé
+                </button>
+                <button 
+                  className={`filter-btn ${filterStatus === 'En attente' ? 'active' : ''}`}
+                  onClick={() => setFilterStatus('En attente')}
+                >
+                  En attente
+                </button>
+              </div>
+              
+              <div className="reservations-grid">
+                {upcomingReservations
+                  .filter(reservation => filterStatus === 'all' || reservation.status === filterStatus)
+                  .map(reservation => (
+                    <div key={reservation.id} className="reservation-card">
+                    <div className="card-header">
+                      <h3 className="service-name">{reservation.service}</h3>
+                      <span className={`status-badge status-${reservation.status.toLowerCase().replace(' ', '-')}`}>
+                        {reservation.status}
+                      </span>
+                    </div>
+                    <div className="card-body">
+                      <p className="provider-name">{reservation.provider}</p>
+                      <div className="reservation-details">
+                        <span className="date"><FaCalendar className="detail-icon" /> {reservation.date}</span>
+                        <span className="time"><FaRegClock className="detail-icon" /> {reservation.time}</span>
+                      </div>
+                    </div>
                   </div>
-                  <span className={`status-badge ${booking.status}`}>{booking.status}</span>
-                </div>
-                <button className="action-btn">Voir Détails</button>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Past Bookings Tab */}
-        {activeTab === 'past' && (
-          <div className="bookings-grid">
-            {pastBookings.map(booking => (
-              <div key={booking.id} className="booking-card past">
-                <img src={booking.image} alt={booking.service} className="booking-img" />
-                <div className="booking-info">
-                  <h3>{booking.service}</h3>
-                  <p className="provider-name">{booking.provider}</p>
-                  <span className="status-badge completed">Terminé</span>
-                </div>
-                <button className="review-btn">⭐ Laisser un avis</button>
+          {activeTab === 'history' && (
+            <div className="tab-content">
+  
+              
+              <div className="reservations-grid">
+                {pastReservations.map(reservation => (
+                  <div key={reservation.id} className="reservation-card">
+                    <div className="card-header">
+                      <h3 className="service-name">{reservation.service}</h3>
+                      <div className="review-btn-container">
+                        <button 
+                          className="review-btn-small"
+                          onClick={() => setShowReviewForm(reservation.id)}
+                        >
+                          Laissez un avis
+                        </button>
+                      </div>
+                    </div>
+                    <div className="card-body">
+                      <p className="provider-name">{reservation.provider}</p>
+                      <div className="reservation-details">
+                        <span className="date"><FaCalendar className="detail-icon" /> {reservation.date}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* Settings Tab (Slide 12 Profile Form) */}
-        {activeTab === 'settings' && (
-          <div className="settings-form">
-            <h2>Mon Profil</h2>
-            <div className="form-group">
-              <label>Nom Complet</label>
-              <input type="text" defaultValue="samia lahrach" />
+              
+              {/* Review Form Modal - Outside the loop */}
+              {showReviewForm && (
+                <div className="review-modal">
+                  <div className="review-form">
+                    <h3 className="review-form-title">Laissez votre avis</h3>
+                    <div className="form-group">
+                      <label className="form-label">Nom du prestataire</label>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        defaultValue={pastReservations.find(r => r.id === showReviewForm)?.provider || ''}
+                        readOnly
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Note</label>
+                      <div className="star-rating">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span 
+                            key={star}
+                            className={`star ${star <= rating ? 'selected' : ''}`}
+                            onClick={() => setRating(star)}
+                          >
+                            ★
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Commentaire</label>
+                      <textarea 
+                        className="form-textarea"
+                        placeholder="Partagez votre expérience..."
+                        rows="4"
+                      ></textarea>
+                    </div>
+                    <div className="form-actions">
+                      <button 
+                        className="cancel-btn"
+                        onClick={() => {
+                          setShowReviewForm(null);
+                          setRating(5);
+                        }}
+                      >
+                        Annuler
+                      </button>
+                      <button 
+                        className="submit-review-btn"
+                        onClick={() => {
+                          setShowReviewForm(null);
+                          setRating(5);
+                          setSuccessMessage('Votre avis est publié !');
+                          setShowSuccess(true);
+                          setTimeout(() => setShowSuccess(false), 3000);
+                        }}
+                      >
+                        Publier
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="form-group">
-              <label>Email</label>
-              <input type="email" defaultValue="samia@example.com" />
-            </div>
-            <div className="form-group">
-              <label>Téléphone</label>
-              <input type="tel" defaultValue="0600000000" />
-            </div>
-            <button className="save-btn">Enregistrer les modifications</button>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'favorites' && (
-             <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
-                 <p>Vous n'avez pas encore de favoris.</p>
-                 <button className="action-btn" style={{marginTop: '10px'}}>Explorer les services</button>
-             </div>
-        )}
-
-      </div>
+          {activeTab === 'profile' && (
+            <div className="tab-content">
+              
+              <div className="profile-form">
+                <div className="form-section">
+                  <h2 className="content-title">Mon Profil</h2>
+                  <div className="photo-upload-section">
+                    <div className="avatar-wrapper-large">
+                      {user.avatar ? (
+                        <img 
+                          src={user.avatar} 
+                          alt="Photo de profil" 
+                          className="profile-photo-large"
+                        />
+                      ) : (
+                        <div className="profile-photo-placeholder">
+                          <span className="placeholder-initials">SL</span>
+                        </div>
+                      )}
+                      <label htmlFor="avatar-upload-profile" className="avatar-overlay-large">
+                        <span className="camera-icon"><FaCamera /></span>
+                      </label>
+                      <input 
+                        type="file" 
+                        id="avatar-upload-profile" 
+                        accept="image/*" 
+                        onChange={handleImageUpload}
+                        style={{display: 'none'}}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Nom Complet</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      defaultValue={user.name}
+                      onChange={(e) => setUser(prev => ({...prev, name: e.target.value}))}
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Ville</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      defaultValue={user.city}
+                      onChange={(e) => setUser(prev => ({...prev, city: e.target.value}))}
+                    />
+                  </div>
+                </div>
+                
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Email</label>
+                    <input 
+                      type="email" 
+                      className="form-input" 
+                      defaultValue="samia@example.com"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Téléphone</label>
+                    <input 
+                      type="tel" 
+                      className="form-input" 
+                      defaultValue="06 12 34 56 78"
+                    />
+                  </div>
+                </div>
+                
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Fonction</label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      defaultValue="Mariée"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label className="form-label">Date du mariage</label>
+                    <input 
+                      type="date" 
+                      className="form-input" 
+                      defaultValue="2024-06-15"
+                    />
+                  </div>
+                </div>
+                
+                <button 
+                  className="save-btn"
+                  onClick={() => {
+                    setSuccessMessage('Vos modifications sont enregistrées !');
+                    setShowSuccess(true);
+                    setTimeout(() => setShowSuccess(false), 3000);
+                  }}
+                >
+                  Enregistrer les modifications
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
