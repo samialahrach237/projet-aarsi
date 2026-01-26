@@ -5,7 +5,7 @@ import '../Styles/UserDashboard.css';
 function UserDashboard() {
   const [activeTab, setActiveTab] = useState('upcoming');
   const [user, setUser] = useState({
-    name: 'Samia Lahrichi',
+    name: 'Samia Lahrach',
     city: 'Casablanca',
     avatar: null
   });
@@ -130,7 +130,6 @@ function UserDashboard() {
           <div className="user-info">
             <h2 className="user-name">{user.name}</h2>
             <p className="user-city">{user.city}</p>
-            <span className="user-role">Mariée</span>
           </div>
         </header>
 

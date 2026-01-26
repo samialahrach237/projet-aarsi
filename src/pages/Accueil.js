@@ -11,7 +11,7 @@ function Accueil() {
       <section className="organizer-section">
         <div className="organizer-container">
           <div className="organizer-content">
-            <h2 className="organizer-title">Rir B'click un mariage magic  </h2>
+            <h2 className="organizer-title">Ghir B'click un mariage magic  </h2>
             <p className="organizer-description">
                Découvrez une plateforme unique dédiée aux futurs mariés. 
                Accédez à une sélection exclusive de prestataires de confiance et organisez 

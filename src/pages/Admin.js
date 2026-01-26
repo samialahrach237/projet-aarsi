@@ -7,7 +7,7 @@ import {
 import { 
   MdDashboard, MdPeople, MdStore, MdEvent, MdStar, 
   MdPayments, MdMessage, MdSettings, MdContentPaste,
-  MdFileDownload, MdFilterList, MdTrendingUp, MdTrendingDown
+  MdFileDownload, MdFilterList, MdTrendingUp, MdTrendingDown, MdLogout
 } from 'react-icons/md';
 import providerService from "../services/providerService";
 import "../Styles/Admin.css";
@@ -117,7 +117,7 @@ function Admin() {
 
   const handleLogout = () => {
     sessionStorage.removeItem("isAdminAuthenticated");
-    navigate("/admin-login");
+    navigate("/");
   };
 
   if (checkingAuth) {
@@ -251,18 +251,7 @@ function Admin() {
           </div>
         </div>
 
-        <div className="sub-res-section">
-          <div className="sub-card card-box">
-            <h3>Subscriptions</h3>
-            <div className="sub-item">
-              <span>Subscribed</span>
-              <strong>{stats.subscriptions.subscribed}</strong>
-            </div>
-            <div className="sub-item">
-              <span>No Subscription</span>
-              <strong>{stats.subscriptions.notSubscribed}</strong>
-            </div>
-          </div>
+        <div className="res-section">
           <div className="res-card card-box">
             <h3>Reservations</h3>
             <div className="res-grid">
@@ -391,8 +380,8 @@ function Admin() {
     <div className="admin-layout">
       <aside className="admin-sidebar">
         <div className="sidebar-logo">
-          <h2>AARSSI</h2>
-          <span>Admin</span>
+          <h2>AAR<span>SSI</span></h2>
+         
         </div>
         <nav className="sidebar-nav">
           <button className={currentView === "dashboard" ? "active" : ""} onClick={() => setCurrentView("dashboard")}>
@@ -401,16 +390,15 @@ function Admin() {
           <button className={currentView === "providers" ? "active" : ""} onClick={() => setCurrentView("providers")}>
             <MdStore /> Prestataires
           </button>
-          <button disabled><MdPeople /> Clients</button>
-          <button disabled><MdContentPaste /> Services</button>
-          <button disabled><MdEvent /> Reservations</button>
-          <button disabled><MdStar /> Reviews</button>
-          <button disabled><MdPayments /> Payments</button>
-          <button disabled><MdMessage /> Messages</button>
-          <button disabled><MdContentPaste /> CMS</button>
-          <button disabled><MdSettings /> Settings</button>
+          <button className={currentView === "clients" ? "active" : ""} onClick={() => setCurrentView("clients")}><MdPeople /> Clients</button>
+          <button className={currentView === "services" ? "active" : ""} onClick={() => setCurrentView("services")}><MdContentPaste /> Services</button>
+          <button className={currentView === "reservations" ? "active" : ""} onClick={() => setCurrentView("reservations")}><MdEvent /> Reservations</button>
+          <button className={currentView === "reviews" ? "active" : ""} onClick={() => setCurrentView("reviews")}><MdStar /> Reviews</button>
+          <button className={currentView === "payments" ? "active" : ""} onClick={() => setCurrentView("payments")}><MdPayments /> Payments</button>
+          <button className={currentView === "messages" ? "active" : ""} onClick={() => setCurrentView("messages")}><MdMessage /> Messages</button>
+          <button className={currentView === "cms" ? "active" : ""} onClick={() => setCurrentView("cms")}><MdContentPaste /> CMS</button>
+          <button className={currentView === "settings" ? "active" : ""} onClick={() => setCurrentView("settings")}><MdSettings /> Settings</button>
         </nav>
-        <button className="sidebar-logout" onClick={handleLogout}>🚪 Logout</button>
       </aside>
 
       <main className="admin-main">
@@ -420,9 +408,25 @@ function Admin() {
           </div>
           <div className="topbar-right">
             <div className="topbar-filters">
-              <select><option>All Cities</option></select>
-              <select><option>All Categories</option></select>
+              <select>
+                <option>All Cities</option>
+                <option>Fes</option>
+                <option>Meknes</option>
+                <option>Casablanca</option>
+                <option>Agadir</option>
+                <option>Marrakech</option>
+              </select>
+              <select>
+                <option>All Categories</option>
+                <option>Negafa</option>
+                <option>Traiteur</option>
+                <option>Photographe</option>
+                <option>Taifar</option>
+              </select>
               <input type="date" />
+              <button className="header-logout" onClick={handleLogout}>
+                <MdLogout /> Logout
+              </button>
             </div>
           </div>
         </header>
@@ -435,7 +439,14 @@ function Admin() {
               </button>
             )}
           </div>
-          {currentView === "dashboard" ? renderDashboard() : renderProviders()}
+          {currentView === "dashboard" ? renderDashboard() : 
+           currentView === "providers" ? renderProviders() :
+           (
+             <div className="generic-view">
+               <h2>{currentView.charAt(0).toUpperCase() + currentView.slice(1)} View</h2>
+               <p>Cette section est en cours de développement.</p>
+             </div>
+           )}
         </div>
       </main>
 
