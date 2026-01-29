@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { FaGlobe, FaHome, FaUtensils, FaCrown, FaCamera, FaMusic, FaGem, FaGift } from 'react-icons/fa';
+import { FaGlobe, FaHome, FaUtensils, FaCrown, FaCamera, FaMusic, FaGem, FaGift, FaSpa, FaPalette } from 'react-icons/fa';
 import SearchBar from '../Components/SearchBar';
 import ServiceCard from '../Components/ServiceCard';
 import { getAllServices, getAllCategories, getUniqueCities } from '../data/serviceRepo';
@@ -84,6 +84,10 @@ function Services() {
         return <FaGem className="category-icon" />;
       case 'Tyafer':
         return <FaGift className="category-icon" />;
+      case 'Henna':
+        return <FaSpa className="category-icon" />;
+      case 'Maquillage':
+        return <FaPalette className="category-icon" />;
       default:
         return <FaGlobe className="category-icon" />;
     }

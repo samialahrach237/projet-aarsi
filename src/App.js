@@ -17,13 +17,15 @@ import ProviderProfile from "./pages/ProviderProfile"; // صفحة تفاصيل 
 import UserDashboard from "./pages/UserDashboard"; // لوحة تحكم المستخدم
 import Provider from "./pages/provider"; // صفحة Provider
 import ProviderDashboard from "./pages/ProviderDashboard"; // لوحة تحكم Provider
-import Reservation from "./pages/Reservation"; // صفحة Reservation
+
 import Admin from "./pages/Admin"; // صفحة Admin
 import AdminLogin from "./pages/AdminLogin"; // صفحة تسجيل دخول Admin
 import Avis from "./pages/Avis";
 import Connexion from "./pages/Connexion";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/error"; // صفحة 404
+import Reservation from "./pages/Reservation";
+
 
 function App() {
   return (
@@ -39,7 +41,6 @@ function App() {
         <Route path="/" element={<Accueil />} />
         <Route path="/services" element={<Services />} />
         <Route path="/service/:id" element={<ProviderProfile />} />
-        <Route path="/reservation/:id" element={<Reservation />} />
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
         <Route path="/provider" element={<Provider />} />
@@ -49,6 +50,7 @@ function App() {
         <Route path="/avis" element={<Avis />} />
         <Route path="/connexion" element={<Connexion />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/reservation/:id" element={<Reservation />} />
         {/* Catch-all route for 404 - must be last */}
         <Route path="*" element={<NotFound />} />
       </Routes>
