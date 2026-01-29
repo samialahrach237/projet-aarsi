@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaGlobe, FaHome, FaUtensils, FaCrown, FaCamera, FaMusic, FaGem, FaGift } from 'react-icons/fa';
 import SearchBar from '../Components/SearchBar';
@@ -11,6 +11,31 @@ function Services() {
   const [services] = useState(getAllServices());
   const [categories] = useState(getAllCategories());
   const [cities] = useState(getUniqueCities());
+  const [showRightArrow, setShowRightArrow] = useState(true);
+  const categoryContainerRef = useRef(null);
+
+  // Check scroll position for arrow visibility
+  const checkScrollPosition = () => {
+    const container = categoryContainerRef.current;
+    if (!container) return;
+    
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    const isAtEnd = scrollLeft + clientWidth >= scrollWidth - 5;
+    setShowRightArrow(!isAtEnd);
+  };
+
+  // Handle scroll events
+  useEffect(() => {
+    const container = categoryContainerRef.current;
+    if (!container) return;
+    
+    container.addEventListener('scroll', checkScrollPosition);
+    checkScrollPosition(); // Initial check
+    
+    return () => {
+      container.removeEventListener('scroll', checkScrollPosition);
+    };
+  }, []);
   
   const [filters, setFilters] = useState({
     city: '',
@@ -119,18 +144,31 @@ function Services() {
         </div>
 
         <div className="category-bar-premium">
-          <div className="category-scroll-container">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                className={`category-btn-premium ${filters.category === (cat.id === 'all' ? '' : cat.id) ? 'active' : ''}`}
-                onClick={() => handleFilterChange('category', cat.id === 'all' ? '' : cat.id)}
-              >
-                <span className="category-icon-premium">{getCategoryIcon(cat.id)}</span>
-                <span className="category-text-premium">{cat.title}</span>
-                {filters.category === (cat.id === 'all' ? '' : cat.id) && <div className="active-indicator"></div>}
-              </button>
-            ))}
+          <div className="category-scroll-wrapper">
+            <div 
+              className="category-scroll-container" 
+              ref={categoryContainerRef}
+              onScroll={checkScrollPosition}
+            >
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  className={`category-btn-premium ${filters.category === (cat.id === 'all' ? '' : cat.id) ? 'active' : ''}`}
+                  onClick={() => handleFilterChange('category', cat.id === 'all' ? '' : cat.id)}
+                >
+                  <span className="category-icon-premium">{getCategoryIcon(cat.id)}</span>
+                  <span className="category-text-premium">{cat.title}</span>
+                  {filters.category === (cat.id === 'all' ? '' : cat.id) && <div className="active-indicator"></div>}
+                </button>
+              ))}
+            </div>
+            {showRightArrow && (
+              <div className="scroll-right-indicator">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 18L15 12L9 6" stroke="#9c7c3a" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            )}
           </div>
         </div>
       </div>
