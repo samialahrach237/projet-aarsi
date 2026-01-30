@@ -425,7 +425,7 @@ function Admin() {
               </select>
               <input type="date" />
               <button className="header-logout" onClick={handleLogout}>
-                <MdLogout /> Logout
+                <MdLogout /> Déconnexion
               </button>
             </div>
           </div>

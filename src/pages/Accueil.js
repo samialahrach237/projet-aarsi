@@ -1,10 +1,118 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import ServiceCard from "../Components/ServiceCard";
 import { getAllServices } from "../data/serviceRepo";
 import "../Styles/Accueil.css";
 
 function Accueil() {
+  const containerRef = useRef(null);
+  const intervalRef = useRef(null);
+  const isPaused = useRef(false);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    // Check if we're on mobile screen
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+      // For mobile - manual scroll with arrows
+      const updateArrowsVisibility = () => {
+        if (container) {
+          const { scrollLeft, scrollWidth, clientWidth } = container;
+          setShowLeftArrow(scrollLeft > 5);
+          setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 5);
+        }
+      };
+      
+      // Initial check
+      updateArrowsVisibility();
+      
+      // Add scroll listener
+      container.addEventListener('scroll', updateArrowsVisibility);
+      
+      // Clean up
+      return () => {
+        container.removeEventListener('scroll', updateArrowsVisibility);
+      };
+    } else {
+      // For desktop - auto-scroll logic
+      const startAutoScroll = () => {
+        if (isPaused.current) return;
+        
+        const scrollAmount = container.offsetWidth;
+        const maxScroll = container.scrollWidth - container.offsetWidth;
+        
+        if (container.scrollLeft >= maxScroll) {
+          container.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+      };
+
+      // Start auto-scroll
+      intervalRef.current = setInterval(startAutoScroll, 4000); // Normal speed for smooth scrolling
+
+      // Pause on touch/mouse
+      const pauseOnInteraction = () => {
+        isPaused.current = true;
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
+      };
+
+      // Resume after delay
+      const resumeAfterDelay = () => {
+        setTimeout(() => {
+          isPaused.current = false;
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+          }
+          intervalRef.current = setInterval(startAutoScroll, 4000); // Normal speed for smooth scrolling
+        }, 5000);
+      };
+
+      container.addEventListener('touchstart', pauseOnInteraction);
+      container.addEventListener('mousedown', pauseOnInteraction);
+      container.addEventListener('touchend', resumeAfterDelay);
+      container.addEventListener('mouseup', resumeAfterDelay);
+
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
+        container.removeEventListener('touchstart', pauseOnInteraction);
+        container.removeEventListener('mousedown', pauseOnInteraction);
+        container.removeEventListener('touchend', resumeAfterDelay);
+        container.removeEventListener('mouseup', resumeAfterDelay);
+      };
+    }
+  }, []);
+
+  // Scroll functions for mobile - scroll by card width
+  const scrollLeft = () => {
+    if (containerRef.current) {
+      const cardWidth = document.querySelector('.autoscroll-item')?.offsetWidth || containerRef.current.clientWidth * 0.8;
+      containerRef.current.scrollBy({
+        left: -cardWidth,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollRight = () => {
+    if (containerRef.current) {
+      const cardWidth = document.querySelector('.autoscroll-item')?.offsetWidth || containerRef.current.clientWidth * 0.8;
+      containerRef.current.scrollBy({
+        left: cardWidth,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <div className="home-wrapper">
       {/* Organizer Section - Matching the reference image */}
@@ -80,26 +188,38 @@ function Accueil() {
     <section className="autoscroll-services-section">
       <div className="container">
         <h2 className="section-title">Nos Prestataires Populaires</h2>
-        <div className="autoscroll-container">
-          <div className="autoscroll-content">
-            {[...Array(2)].map((_, index) => (
-              <React.Fragment key={index}>
-                {getAllServices().map((service) => (
-                  <div key={`${service.id}-${index}`} className="autoscroll-item">
-                    <ServiceCard 
-                      id={service.id}
-                      title={service.name}
-                      category={service.categoryId}
-                      location={service.city}
-                      rating={service.rating}
-                      price={service.price}
-                      image={service.image}
-                      reviews={service.reviews}
-                    />
-                  </div>
-                ))}
-              </React.Fragment>
-            ))}
+        <div className="autoscroll-container-wrapper">
+          <div className={`scroll-arrow left ${showLeftArrow ? 'visible' : 'hidden'}`} onClick={scrollLeft}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 18L9 12L15 6" stroke="#C5A059" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <div className="autoscroll-container" ref={containerRef}>
+            <div className="autoscroll-content">
+              {[...Array(2)].map((_, index) => (
+                <React.Fragment key={index}>
+                  {getAllServices().map((service) => (
+                    <div key={`${service.id}-${index}`} className="autoscroll-item">
+                      <ServiceCard 
+                        id={service.id}
+                        title={service.name}
+                        category={service.categoryId}
+                        location={service.city}
+                        rating={service.rating}
+                        price={service.price}
+                        image={service.image}
+                        reviews={service.reviews}
+                      />
+                    </div>
+                  ))}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+          <div className={`scroll-arrow right ${showRightArrow ? 'visible' : 'hidden'}`} onClick={scrollRight}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 18L15 12L9 6" stroke="#C5A059" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         </div>
       </div>

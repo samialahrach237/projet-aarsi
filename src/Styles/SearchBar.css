@@ -55,7 +55,8 @@
   padding: 0 18px;
   border: none;
   outline: none;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
+  letter-spacing: -0.02em;
   color: black;
   background: white;
   cursor: pointer;
@@ -121,6 +122,14 @@
     gap: 10px;
   }
   
+  .modern-search-select {
+    font-size: 0.8rem;
+    letter-spacing: -0.03em;
+    padding: 0 15px;
+    height: 38px;
+    background-position: right 15px center;
+  }
+  
   .search-field-group {
     width: 100%;
   }
@@ -132,5 +141,22 @@
   .search-submit-button {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .modern-search-select {
+    font-size: 0.75rem;
+    letter-spacing: -0.04em;
+    padding: 0 12px;
+    height: 36px;
+    background-position: right 12px center;
+    background-size: 10px;
+  }
+  
+  .search-submit-button {
+    height: 36px;
+    font-size: 0.8rem;
+    padding: 6px 12px;
   }
 }

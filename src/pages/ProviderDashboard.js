@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   MdDashboard, MdPhotoLibrary, MdLayers, MdCalendarMonth, 
-  MdAssignment, MdPayments, MdAccountCircle, MdCloudUpload, MdStar, MdDelete, MdSave, MdLogout
+  MdAssignment, MdPayments, MdAccountCircle, MdCloudUpload, MdStar, MdDelete, MdSave, MdLogout,
+  MdHome, MdCollections, MdEvent, MdBook, MdPerson, MdMenu
 } from "react-icons/md";
 import "../Styles/ProviderDashboard.css";
 
@@ -10,6 +11,7 @@ function ProviderDashboard() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState("Photos");
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [images, setImages] = useState([
     { id: 1, url: "https://images.unsplash.com/photo-1594463750939-ebb6bca669b6?auto=format&fit=crop&q=80&w=400", isPrimary: true },
     { id: 2, url: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=400", isPrimary: false },
@@ -194,7 +196,6 @@ function ProviderDashboard() {
                  </div>
                </div>
               
-
                 <div className="form-grid">
                   <div className="form-group">
                     <label>Nom du Profil</label>
@@ -257,58 +258,88 @@ function ProviderDashboard() {
 
   return (
     <div className="provider-dashboard-layout">
-      {/* Sidebar */}
-      <aside className="dashboard-sidebar">
-        <div className="sidebar-logo-container">
-          <h1 className="logo-text">AAR<span>SSI</span></h1>
-        </div>
+      {/* Mobile Drawer Backdrop */}
+      {isDrawerOpen && (
+        <div 
+          className="drawer-backdrop"
+          onClick={() => setIsDrawerOpen(false)}
+        ></div>
+      )}
+      
+      {/* Mobile Drawer Menu */}
+      <aside className={`dashboard-sidebar ${isDrawerOpen ? 'open' : ''}`}>
+        
         
         <nav className="sidebar-nav">
           <button 
             className={`nav-item ${activeTab === "Overview" ? "active" : ""}`}
-            onClick={() => setActiveTab("Overview")}
+            onClick={() => {
+              setActiveTab("Overview");
+              setIsDrawerOpen(false);
+            }}
           >
             <MdDashboard /> Overview
           </button>
           <button 
             className={`nav-item ${activeTab === "Photos" ? "active" : ""}`}
-            onClick={() => setActiveTab("Photos")}
+            onClick={() => {
+              setActiveTab("Photos");
+              setIsDrawerOpen(false);
+            }}
           >
             <MdPhotoLibrary /> Photos
           </button>
           <button 
             className={`nav-item ${activeTab === "Packages" ? "active" : ""}`}
-            onClick={() => setActiveTab("Packages")}
+            onClick={() => {
+              setActiveTab("Packages");
+              setIsDrawerOpen(false);
+            }}
           >
             <MdLayers /> Packages
           </button>
           <button 
             className={`nav-item ${activeTab === "Calendar" ? "active" : ""}`}
-            onClick={() => setActiveTab("Calendar")}
+            onClick={() => {
+              setActiveTab("Calendar");
+              setIsDrawerOpen(false);
+            }}
           >
             <MdCalendarMonth /> Calendar
           </button>
           <button 
             className={`nav-item ${activeTab === "Bookings" ? "active" : ""}`}
-            onClick={() => setActiveTab("Bookings")}
+            onClick={() => {
+              setActiveTab("Bookings");
+              setIsDrawerOpen(false);
+            }}
           >
             <MdAssignment /> Bookings
           </button>
           <button 
             className={`nav-item ${activeTab === "Earnings" ? "active" : ""}`}
-            onClick={() => setActiveTab("Earnings")}
+            onClick={() => {
+              setActiveTab("Earnings");
+              setIsDrawerOpen(false);
+            }}
           >
             <MdPayments /> Earnings
           </button>
           <button 
             className={`nav-item ${activeTab === "Profile" ? "active" : ""}`}
-            onClick={() => setActiveTab("Profile")}
+            onClick={() => {
+              setActiveTab("Profile");
+              setIsDrawerOpen(false);
+            }}
           >
             <MdAccountCircle /> Profile
           </button>
           <button 
             className="nav-item"
-            onClick={handleDeconnexion}
+            onClick={() => {
+              handleDeconnexion();
+              setIsDrawerOpen(false);
+            }}
           >
             <MdLogout /> Déconnexion
           </button>
@@ -319,6 +350,15 @@ function ProviderDashboard() {
       <main className="dashboard-main">
         <header className="dashboard-topbar">
           <div className="user-profile-summary">
+            {/* Mobile Menu Toggle Button - inside user profile summary on phone */}
+            <button 
+              className="mobile-menu-toggle"
+              onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+              aria-label="Toggle menu"
+            >
+              <MdMenu size={24} />
+            </button>
+            
             <div className="avatar-wrapper">
               <img src={profileData.profileImage} alt="Avatar" className="user-avatar" />
               <label htmlFor="topbar-avatar-upload" className="avatar-overlay">

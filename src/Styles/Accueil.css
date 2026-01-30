@@ -360,8 +360,8 @@
   }
   
   .collage-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   
   .collage-item {
@@ -383,8 +383,8 @@
   }
   
   .stats-bar {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
     padding: 20px 0;
   }
   
@@ -434,17 +434,25 @@
   font-family: 'Playfair Display', serif;
 }
 
+.autoscroll-container-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
 .autoscroll-container {
   overflow: hidden;
   width: 100%;
   position: relative;
   padding: 20px 0;
+  flex-grow: 1;
 }
 
 .autoscroll-content {
   display: flex;
   width: 200%; /* Double width for seamless looping */
-  animation: scroll 35s linear infinite;
+  animation: scroll 40s linear infinite; /* Normal speed for smooth scrolling */
 }
 
 @keyframes scroll {
@@ -466,6 +474,69 @@
 /* Pause animation on hover */
 .autoscroll-container:hover .autoscroll-content {
   animation-play-state: paused;
+}
+
+.scroll-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #c5a059;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.scroll-arrow.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scroll-arrow.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.scroll-arrow:hover {
+  background: #c5a059;
+  border-color: #c5a059;
+}
+
+.scroll-arrow:hover svg path {
+  stroke: white;
+}
+
+.scroll-arrow.left {
+  left: 10px;
+}
+
+.scroll-arrow.right {
+  right: 10px;
+}
+
+/* Mobile-specific styling for arrows */
+@media (max-width: 768px) {
+  .scroll-arrow {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .scroll-arrow.left {
+    left: 5px;
+  }
+  
+  .scroll-arrow.right {
+    right: 5px;
+  }
 }
 
 /* Adjust card styles within the auto-scroll section */
@@ -490,13 +561,32 @@
     margin-bottom: 25px;
   }
   
+  .autoscroll-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .autoscroll-container::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .autoscroll-content {
+    display: flex;
+    width: max-content;
+  }
+  
   .autoscroll-item {
-    min-width: 250px;
-    padding: 0 8px;
+    min-width: 90vw;
+    scroll-snap-align: start;
+    padding: 0 10px;
+    flex: 0 0 auto;
+    box-sizing: border-box;
   }
   
   .autoscroll-container {
-    padding: 15px 0;
+    padding: 15px 45px; /* Add padding to accommodate arrows */
   }
 }
 
@@ -506,12 +596,31 @@
     margin-bottom: 20px;
   }
   
-  .autoscroll-item {
-    min-width: 220px;
-    padding: 0 6px;
+  .autoscroll-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .autoscroll-container::-webkit-scrollbar {
+    display: none;
   }
   
   .autoscroll-content {
-    animation-duration: 30s; /* Slower animation for smaller screens */
+    display: flex;
+    width: max-content;
+  }
+  
+  .autoscroll-item {
+    min-width: 90vw;
+    scroll-snap-align: start;
+    padding: 0 8px;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+  }
+  
+  .autoscroll-container {
+    padding: 15px 40px; /* Add padding to accommodate arrows */
   }
 }

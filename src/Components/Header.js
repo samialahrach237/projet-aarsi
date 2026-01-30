@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { FaUser } from "react-icons/fa";
 import logoImage from "../Assets/logo/logo.png";
 
 import "../Styles/Header.css";
@@ -29,11 +30,20 @@ function Header() {
           </Link>
         </div>
 
-        {/* زر القائمة للموبايل */}
-        <div className="menu-icon" onClick={toggleMenu}>
-          <span className={isMenuOpen ? "bar open" : "bar"}></span>
-          <span className={isMenuOpen ? "bar open" : "bar"}></span>
-          <span className={isMenuOpen ? "bar open" : "bar"}></span>
+        <div className="header-right-group">
+          {/* Mobile Connection Icon */}
+          <div className="mobile-connection-icon">
+            <Link to="/connexion" className="connection-link">
+              <FaUser className="connection-icon" />
+            </Link>
+          </div>
+
+          {/* زر القائمة للموبايل */}
+          <div className="menu-icon" onClick={toggleMenu}>
+            <span className={isMenuOpen ? "bar open" : "bar"}></span>
+            <span className={isMenuOpen ? "bar open" : "bar"}></span>
+            <span className={isMenuOpen ? "bar open" : "bar"}></span>
+          </div>
         </div>
 
         <nav className={`nav ${isMenuOpen ? "nav-open" : ""}`}>

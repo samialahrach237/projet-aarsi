@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { FaHome, FaHistory, FaUser, FaSignOutAlt, FaCamera, FaEdit, FaCalendarAlt, FaClock, FaCheck, FaEllipsisH, FaTimes, FaCalendar, FaRegClock } from 'react-icons/fa';
+import { FaHome, FaHistory, FaUser, FaSignOutAlt, FaCamera, FaEdit, FaCalendarAlt, FaClock, FaCheck, FaEllipsisH, FaTimes, FaCalendar, FaRegClock, FaBars } from 'react-icons/fa';
 import '../Styles/UserDashboard.css';
 
 function UserDashboard() {
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [user, setUser] = useState({
     name: 'Samia Lahrach',
     city: 'Casablanca',
@@ -56,10 +57,19 @@ function UserDashboard() {
           <span className="success-message">{successMessage}</span>
         </div>
       )}
-      {/* Left Sidebar */}
-      <aside className="sidebar">
+      
+      {/* Mobile Drawer Backdrop */}
+      {isDrawerOpen && (
+        <div 
+          className="drawer-backdrop"
+          onClick={() => setIsDrawerOpen(false)}
+        ></div>
+      )}
+      
+      {/* Mobile Drawer Menu */}
+      <aside className={`sidebar ${isDrawerOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h1 className="logo">AAR<span className="green-text">SSI</span></h1>
+          {/* AARSSI logo removed */}
         </div>
         
         <nav className="sidebar-nav">
@@ -71,7 +81,10 @@ function UserDashboard() {
                   <li>
                     <button
                       className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
-                      onClick={() => setActiveTab(item.id)}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setIsDrawerOpen(false);
+                      }}
                     >
                       <span className="nav-icon">{item.icon}</span>
                       <span className="nav-label">{item.label}</span>
@@ -84,6 +97,7 @@ function UserDashboard() {
                         onClick={() => {
                           localStorage.removeItem('userToken');
                           window.location.href = '/';
+                          setIsDrawerOpen(false);
                         }}
                       >
                         <span className="nav-icon"><FaSignOutAlt /></span>
@@ -102,6 +116,15 @@ function UserDashboard() {
       <main className="main-content">
         {/* User Info Header */}
         <header className="user-header">
+          {/* Mobile Menu Toggle Button */}
+          <button 
+            className="mobile-menu-toggle"
+            onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+            aria-label="Toggle menu"
+          >
+            <FaBars size={24} />
+          </button>
+          
           <div className="user-avatar-container">
             <div className="avatar-wrapper">
               {user.avatar ? (
@@ -386,6 +409,30 @@ function UserDashboard() {
           )}
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="mobile-bottom-nav">
+        {menuItems.map(item => (
+          <button
+            key={item.id}
+            className={`nav-item-mobile ${activeTab === item.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(item.id)}
+          >
+            <span className="nav-icon-mobile">{item.icon}</span>
+            <span className="nav-label-mobile">{item.label}</span>
+          </button>
+        ))}
+        <button 
+          className="nav-item-mobile logout-btn-mobile"
+          onClick={() => {
+            localStorage.removeItem('userToken');
+            window.location.href = '/';
+          }}
+        >
+          <span className="nav-icon-mobile"><FaSignOutAlt /></span>
+          <span className="nav-label-mobile">Déconnexion</span>
+        </button>
+      </nav>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Styles/Avis.css";
 
@@ -63,7 +63,56 @@ function Avis() {
     }
   ]);
   
-
+  const reviewsContainerRef = useRef(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+  
+  // Function to update arrow visibility
+  const updateArrowsVisibility = () => {
+    // Only show arrows on mobile devices
+    if (window.innerWidth <= 768 && reviewsContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = reviewsContainerRef.current;
+      setShowLeftArrow(scrollLeft > 5);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 5);
+    } else {
+      setShowLeftArrow(false);
+      setShowRightArrow(false);
+    }
+  };
+  
+  // Function to scroll left
+  const scrollLeft = () => {
+    if (reviewsContainerRef.current) {
+      reviewsContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+    }
+  };
+  
+  // Function to scroll right
+  const scrollRight = () => {
+    if (reviewsContainerRef.current) {
+      reviewsContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+  };
+  
+  // Effect to update arrows visibility on scroll
+  useEffect(() => {
+    const container = reviewsContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', updateArrowsVisibility);
+      // Initial check
+      updateArrowsVisibility();
+      
+      return () => {
+        container.removeEventListener('scroll', updateArrowsVisibility);
+      };
+    }
+  }, []);
+  
+  // Effect to update arrows visibility when reviews change
+  useEffect(() => {
+    // Delay to ensure DOM is updated
+    setTimeout(updateArrowsVisibility, 100);
+  }, [reviews]);
   
   const navigate = useNavigate();
 
@@ -165,32 +214,53 @@ function Avis() {
       </div>
 
       <div className="reviews-container">
-        <div className="reviews-scroll-wrapper">
-          {reviews.map((review) => (
-            <div key={review.id} className="review-card">
-              <div className="review-profile-section">
-                <div className="reviewer-avatar-centered">
-                  <img src={review.profilePhoto} alt={review.name} className="profile-photo" />
-                </div>
-                <div className="reviewer-info-centered">
-                  <h3 className="reviewer-name">{review.name}</h3>
-                  <div className="reviewer-meta">
-                    <span className="reviewer-profile">{review.profile}</span>
-                    <span className="reviewer-city">• {review.city}</span>
+        <div className="reviews-scroll-wrapper-relative">
+          <div 
+            className="reviews-scroll-wrapper" 
+            ref={reviewsContainerRef}
+          >
+            {reviews.map((review) => (
+              <div key={review.id} className="review-card">
+                <div className="review-profile-section">
+                  <div className="reviewer-avatar-centered">
+                    <img src={review.profilePhoto} alt={review.name} className="profile-photo" />
+                  </div>
+                  <div className="reviewer-info-centered">
+                    <h3 className="reviewer-name">{review.name}</h3>
+                    <div className="reviewer-meta">
+                      <span className="reviewer-profile">{review.profile}</span>
+                      <span className="reviewer-city">• {review.city}</span>
+                    </div>
                   </div>
                 </div>
+                <div className="review-rating">
+                  {renderStars(review.rating)}
+                </div>
+                <div className="review-content">
+                  <p className="review-comment">"{expandedReviews[review.id] ? review.comment : truncateComment(review.comment)}"</p>
+                </div>
+                <button className="voir-details-btn" onClick={() => toggleExpand(review.id)}>
+                  {expandedReviews[review.id] ? "Réduire" : "Voir détails"}
+                </button>
               </div>
-              <div className="review-rating">
-                {renderStars(review.rating)}
-              </div>
-              <div className="review-content">
-                <p className="review-comment">"{expandedReviews[review.id] ? review.comment : truncateComment(review.comment)}"</p>
-              </div>
-              <button className="voir-details-btn" onClick={() => toggleExpand(review.id)}>
-                {expandedReviews[review.id] ? "Réduire" : "Voir détails"}
-              </button>
-            </div>
-          ))}
+            ))}
+          </div>
+          
+          {showLeftArrow && (
+            <button className="scroll-arrow left" onClick={scrollLeft}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="#c5a059" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          )}
+          
+          {showRightArrow && (
+            <button className="scroll-arrow right" onClick={scrollRight}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 18L15 12L9 6" stroke="#c5a059" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          )}
         </div>
       </div>
       
@@ -209,65 +279,61 @@ function Avis() {
       {/* Review Modal */}
       {showReviewModal && (
         <div className="review-modal-overlay" onClick={handleCloseModal}>
-          <div className="review-modal" onClick={(e) => e.stopPropagation()}>
-        
-            
-            <form className="review-form" onSubmit={handleSubmitReview}>
-              <div className="form-group">
-                    <div className="form-header">
-              <div className="form-title">
-                <h2>Laisser un avis</h2>
-              </div>
-              <button type="button" className="form-reduire-icon" onClick={handleCloseModal} aria-label="Fermer">×</button>
-            </div>
-                <label htmlFor="platform">Plateforme:</label>
-                <input
-                  type="text"
-                  id="platform"
-                  value={reviewForm.platform}
-                  readOnly
-                  className="form-input-read-only"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="rating">Votre avis (Notez sur 5 étoiles):</label>
-                <div className="star-rating">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <span 
-                      key={star}
-                      className={`star ${star <= reviewForm.rating ? 'filled' : ''}`}
-                      onClick={() => handleFormChange('rating', star)}
-                    >
-                      ★
-                    </span>
-                  ))}
+          <form className="review-form" onSubmit={handleSubmitReview}>
+            <div className="form-group">
+              <div className="form-header">
+                <div className="form-title">
+                  <h2>Laisser un avis</h2>
                 </div>
+                <button type="button" className="form-reduire-icon" onClick={handleCloseModal} aria-label="Fermer">×</button>
               </div>
-              
-              <div className="form-group">
-                <label htmlFor="review">Votre avis:</label>
-                <textarea 
-                  id="review"
-                  placeholder="Racontez-nous votre expérience..."
-                  value={reviewForm.review}
-                  onChange={(e) => handleFormChange('review', e.target.value)}
-                  maxLength="500"
-                  rows="4"
-                  required
-                ></textarea>
+              <label htmlFor="platform">Plateforme:</label>
+              <input
+                type="text"
+                id="platform"
+                value={reviewForm.platform}
+                readOnly
+                className="form-input-read-only"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="rating">Votre avis (Notez sur 5 étoiles):</label>
+              <div className="star-rating">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span 
+                    key={star}
+                    className={`star ${star <= reviewForm.rating ? 'filled' : ''}`}
+                    onClick={() => handleFormChange('rating', star)}
+                  >
+                    ★
+                  </span>
+                ))}
               </div>
-              
-              <div className="form-actions">
-                <button type="button" className="cancel-btn" onClick={handleCloseModal}>
-                  Annuler
-                </button>
-                <button type="submit" className="submit-btn">
-                  Publiée
-                </button>
-              </div>
-            </form>
-          </div>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="review">Votre avis:</label>
+              <textarea 
+                id="review"
+                placeholder="Racontez-nous votre expérience..."
+                value={reviewForm.review}
+                onChange={(e) => handleFormChange('review', e.target.value)}
+                maxLength="500"
+                rows="4"
+                required
+              ></textarea>
+            </div>
+            
+            <div className="form-actions">
+              <button type="button" className="cancel-btn" onClick={handleCloseModal}>
+                Annuler
+              </button>
+              <button type="submit" className="submit-btn">
+                Publiée
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>
