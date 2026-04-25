@@ -4,7 +4,7 @@ namespace App\Http\Requests\Photo;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StorePhotoRequest extends FormRequest
+class UpdatePhotoRequest extends FormRequest
 {
     public function authorize(): bool
     {

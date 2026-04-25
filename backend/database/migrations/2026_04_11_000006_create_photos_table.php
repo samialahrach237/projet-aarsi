@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('photos', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('prestataire_id');
-            $table->string('url');
-            $table->string('description')->nullable();
+            $table->string('path');
             $table->timestamps();
 
             $table->foreign('prestataire_id')->references('user_id')->on('prestataires')->cascadeOnDelete();

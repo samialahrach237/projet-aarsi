@@ -10,6 +10,20 @@ use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {
+    protected function serviceRelations(): array
+    {
+        return [
+            'prestataire' => fn ($query) => $query->select(
+                'user_id',
+                'nomEntreprise',
+                'description',
+                'adresse',
+                'is_validated'
+            ),
+            'prestataire.user:id,name',
+        ];
+    }
+
     public function myServices(Request $request)
     {
         $prestataireId = $request->user()->prestataire?->user_id;
@@ -23,7 +37,17 @@ class ServiceController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => Service::with('prestataire.user')
+            'data' => Service::query()
+                ->select([
+                    'id',
+                    'prestataire_id',
+                    'name',
+                    'description',
+                    'price',
+                    'duration',
+                    'category',
+                ])
+                ->with($this->serviceRelations())
                 ->where('prestataire_id', $prestataireId)
                 ->orderByDesc('id')
                 ->get(),
@@ -32,7 +56,17 @@ class ServiceController extends Controller
 
     public function index(Request $request)
     {
-        $query = Service::with('prestataire.user');
+        $query = Service::query()
+            ->select([
+                'id',
+                'prestataire_id',
+                'name',
+                'description',
+                'price',
+                'duration',
+                'category',
+            ])
+            ->with($this->serviceRelations());
 
         if ($request->filled('category')) {
             $query->where('category', $request->get('category'));
@@ -52,7 +86,13 @@ class ServiceController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data' => $service->load(['prestataire.user', 'avis']),
+            'data' => $service->load([
+                ...$this->serviceRelations(),
+                'avis' => fn ($query) => $query
+                    ->select('id', 'client_id', 'service_id', 'rating', 'comment', 'created_at')
+                    ->latest(),
+                'avis.client.user:id,name',
+            ]),
         ]);
     }
 

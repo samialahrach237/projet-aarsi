@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PrestataireController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\AvisController;
@@ -24,10 +25,11 @@ use App\Http\Controllers\Api\AdminController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/prestataires', [PrestataireController::class, 'index']);
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{service}', [ServiceController::class, 'show']);
 Route::get('/avis', [AvisController::class, 'index']);
-Route::get('/photos', [PhotoController::class, 'index']);
+Route::get('/photos/{prestataireId}', [PhotoController::class, 'index']);
 Route::get('/calendar', [CalendarController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -52,6 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/avis', [AvisController::class, 'store'])->middleware('role:client');
 
     Route::post('/photos', [PhotoController::class, 'store'])->middleware('role:prestataire');
+    Route::put('/photos/{photo}', [PhotoController::class, 'update'])->middleware('role:prestataire');
     Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->middleware('role:prestataire');
 
     Route::post('/calendar', [CalendarController::class, 'store'])->middleware('role:prestataire');

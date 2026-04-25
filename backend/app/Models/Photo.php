@@ -11,12 +11,20 @@ class Photo extends Model
 
     protected $fillable = [
         'prestataire_id',
+        'path',
+    ];
+
+    protected $appends = [
         'url',
-        'description',
     ];
 
     public function prestataire()
     {
         return $this->belongsTo(Prestataire::class, 'prestataire_id', 'user_id');
+    }
+
+    public function getUrlAttribute(): string
+    {
+        return asset('storage/' . ltrim($this->path, '/'));
     }
 }
