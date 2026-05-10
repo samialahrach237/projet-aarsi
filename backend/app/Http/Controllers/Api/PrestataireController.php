@@ -10,7 +10,7 @@ class PrestataireController extends Controller
     public function index()
     {
         $prestataires = Prestataire::query()
-            ->select('user_id', 'nomEntreprise', 'description', 'adresse')
+            ->select('user_id', 'nomEntreprise', 'slug', 'description', 'adresse', 'photo')
             ->where('is_validated', true)
             ->has('services')
             ->with([
@@ -29,10 +29,11 @@ class PrestataireController extends Controller
                 return [
                     'id' => $prestataire->user_id,
                     'nomEntreprise' => $prestataire->nomEntreprise,
+                    'slug' => $prestataire->slug,
                     'description' => $prestataire->description,
                     'adresse' => $prestataire->adresse,
                     'image_path' => $firstPhoto?->path,
-                    'image' => $firstPhoto?->url ?? 'https://via.placeholder.com/300',
+                    'image' => $firstPhoto?->url ?? $prestataire->photo_url ?? 'https://via.placeholder.com/300',
                     'photos' => $prestataire->photos->map(function ($photo) {
                         return [
                             'id' => $photo->id,

@@ -2,7 +2,11 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -26,5 +30,23 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $e)
+    {
+        if ($request->is('api/login') && $e instanceof MethodNotAllowedHttpException) {
+            return response()->json([
+                'message' => 'Method not allowed. Use POST for login.',
+            ], 405);
+        }
+
+        return parent::render($request, $e);
+    }
+
+    protected function unauthenticated($request, AuthenticationException $exception): JsonResponse
+    {
+        return response()->json([
+            'message' => 'Unauthenticated.',
+        ], 401);
     }
 }

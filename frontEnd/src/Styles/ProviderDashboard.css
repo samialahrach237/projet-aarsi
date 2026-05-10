@@ -725,3 +725,467 @@
 .card-box {
   padding: 20px;
 }
+.provider-section-stack {
+  display: grid;
+  gap: 24px;
+}
+
+.provider-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  border: 1px solid rgba(200, 155, 60, 0.2);
+  background: linear-gradient(135deg, #fffdf7 0%, #f7efdb 100%);
+}
+
+.provider-eyebrow,
+.provider-section-kicker {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.78rem;
+  color: var(--color-gold);
+}
+
+.provider-hero h1,
+.provider-section-header h2 {
+  margin: 0;
+  color: var(--color-black);
+}
+
+.provider-hero-copy {
+  max-width: 680px;
+  margin: 12px 0 0;
+  color: var(--color-text);
+  line-height: 1.7;
+}
+
+.provider-hero-meta {
+  display: grid;
+  gap: 10px;
+  min-width: 220px;
+  color: var(--color-text);
+}
+
+.provider-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.provider-status-pill.is-live {
+  background: rgba(45, 140, 73, 0.12);
+  color: var(--color-emerald);
+}
+
+.provider-status-pill.is-pending {
+  background: rgba(200, 155, 60, 0.12);
+  color: #9a741f;
+}
+
+.provider-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.provider-stat-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fff9eb 100%);
+  border-radius: var(--border-radius-md);
+  padding: 22px;
+  box-shadow: var(--shadow-light);
+  border: 1px solid rgba(200, 155, 60, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.provider-stat-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-emerald);
+  color: var(--color-white);
+  font-size: 1.55rem;
+  box-shadow: var(--shadow-light);
+}
+
+.provider-stat-label,
+.provider-stat-helper,
+.provider-inline-note {
+  margin: 0;
+}
+
+.provider-stat-label {
+  color: var(--color-text-light);
+  font-size: 0.9rem;
+}
+
+.provider-stat-value {
+  margin: 4px 0;
+  font-size: 1.65rem;
+  color: var(--color-black);
+}
+
+.provider-stat-helper,
+.provider-inline-note {
+  color: var(--color-text-light);
+  font-size: 0.88rem;
+}
+
+.provider-section-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.provider-secondary-btn,
+.provider-accept-btn,
+.provider-refuse-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.provider-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff9eb;
+  color: var(--color-black);
+}
+
+.provider-secondary-btn:hover {
+  background: #f8edc8;
+}
+
+.provider-table-card,
+.provider-form-card,
+.provider-error-card {
+  overflow: hidden;
+}
+
+.provider-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.provider-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.provider-table th,
+.provider-table td {
+  text-align: left;
+  padding: 16px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  vertical-align: middle;
+}
+
+.provider-table th {
+  color: var(--color-text-light);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.provider-empty-cell {
+  text-align: center !important;
+  color: var(--color-text-light);
+  padding: 28px !important;
+}
+
+.provider-badge {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.provider-badge.status-pending {
+  background: rgba(200, 155, 60, 0.12);
+  color: #9a741f;
+}
+
+.provider-badge.status-accepted {
+  background: rgba(45, 140, 73, 0.12);
+  color: var(--color-emerald);
+}
+
+.provider-badge.status-rejected,
+.provider-badge.status-refused {
+  background: rgba(220, 53, 69, 0.12);
+  color: #b42333;
+}
+
+.provider-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.provider-form-grid label {
+  display: grid;
+  gap: 8px;
+  color: var(--color-black);
+  font-weight: 600;
+}
+
+.provider-form-grid input,
+.provider-form-grid textarea {
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  font: inherit;
+}
+
+.provider-form-grid .full-width,
+.provider-form-actions.full-width {
+  grid-column: 1 / -1;
+}
+
+.provider-form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.provider-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.provider-row-actions-wide {
+  gap: 10px;
+}
+
+.provider-accept-btn {
+  background: var(--color-emerald);
+  color: var(--color-white);
+}
+
+.provider-accept-btn:hover {
+  background: var(--color-emerald-dark);
+}
+
+.provider-refuse-btn {
+  background: #fce8eb;
+  color: #b42333;
+}
+
+.provider-refuse-btn:hover {
+  background: #f8d6dc;
+}
+
+.provider-upload-panel {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 28px;
+  border-radius: 18px;
+  border: 1px dashed rgba(200, 155, 60, 0.5);
+  background: #fffdf7;
+  text-align: center;
+  cursor: pointer;
+}
+
+.provider-upload-panel input {
+  display: none;
+}
+
+.provider-upload-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-gold);
+  color: var(--color-white);
+  font-size: 1.4rem;
+}
+
+.provider-error-inline {
+  color: #b42333;
+  margin: 12px 0 0;
+}
+
+.provider-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.provider-photo-card {
+  background: var(--color-white);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+}
+
+.provider-photo-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.provider-photo-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+}
+
+@media (max-width: 1100px) {
+  .provider-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .provider-hero,
+  .provider-section-header,
+  .provider-photo-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .provider-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .provider-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-content {
+    padding: 18px;
+  }
+
+  .dashboard-topbar {
+    width: calc(100% - 20px);
+    margin: 10px;
+    padding: 18px;
+  }
+}
+
+.provider-calendar-header {
+  display: grid;
+  gap: 16px;
+}
+
+.provider-calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.legend-chip {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.legend-chip.booked {
+  background: var(--color-emerald);
+}
+
+.legend-chip.available {
+  background: rgba(45, 140, 73, 0.3);
+}
+
+.legend-chip.unavailable {
+  background: rgba(200, 155, 60, 0.45);
+}
+
+.provider-calendar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.9fr);
+  gap: 24px;
+}
+
+.provider-calendar-card {
+  overflow: hidden;
+}
+
+.provider-calendar-shell .rbc-calendar {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.provider-calendar-shell .rbc-toolbar {
+  margin-bottom: 18px;
+  gap: 12px;
+}
+
+.provider-calendar-shell .rbc-toolbar button {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: #fff9eb;
+  color: var(--color-black);
+}
+
+.provider-calendar-shell .rbc-toolbar button.rbc-active {
+  background: var(--color-gold);
+  color: var(--color-white);
+}
+
+.provider-calendar-shell .rbc-off-range-bg {
+  background: #faf8f1;
+}
+
+.provider-calendar-shell .rbc-today {
+  background: rgba(200, 155, 60, 0.12);
+}
+
+.provider-calendar-sidebar {
+  display: grid;
+  align-content: start;
+  gap: 20px;
+}
+
+.provider-calendar-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.provider-calendar-panel h3 {
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.provider-availability-actions {
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 980px) {
+  .provider-calendar-layout {
+    grid-template-columns: 1fr;
+  }
+}

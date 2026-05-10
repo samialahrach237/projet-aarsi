@@ -16,13 +16,20 @@ class Prestataire extends Model
     protected $fillable = [
         'user_id',
         'nomEntreprise',
+        'slug',
         'description',
         'adresse',
         'is_validated',
+        'photo',
+        'ville',
     ];
 
     protected $casts = [
         'is_validated' => 'boolean',
+    ];
+
+    protected $appends = [
+        'photo_url',
     ];
 
     public function user()
@@ -43,5 +50,19 @@ class Prestataire extends Model
     public function calendriers()
     {
         return $this->hasMany(Calendrier::class, 'prestataire_id', 'user_id');
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'prestataire_id', 'user_id');
+    }
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if (!$this->photo) {
+            return null;
+        }
+
+        return asset('storage/' . ltrim($this->photo, '/'));
     }
 }

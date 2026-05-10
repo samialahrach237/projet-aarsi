@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Styles/Connexion.css";
-import { getDefaultRouteForRole, loginUser, registerUser } from "../services/authService";
+import {
+  getDefaultRouteForRole,
+  loginUser,
+  registerUser,
+} from "../services/authService";
 import { getApiErrorMessage, getValidationErrors } from "../utils/apiErrors";
 
 function Connexion() {
@@ -24,6 +28,11 @@ function Connexion() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
+
     setError("");
     setValidationErrors({});
     setIsSubmitting(true);
@@ -47,6 +56,11 @@ function Connexion() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
+
     setError("");
     setValidationErrors({});
     setIsSubmitting(true);

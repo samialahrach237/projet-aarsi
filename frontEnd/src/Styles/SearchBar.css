@@ -109,19 +109,18 @@
   justify-content: center;
 }
 
-/* Mobile responsive */
 @media (max-width: 600px) {
   .modern-search-bar {
     flex-direction: column;
     padding: 15px;
     gap: 10px;
   }
-  
+
   .search-fields-container {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .modern-search-select {
     font-size: 0.8rem;
     letter-spacing: -0.03em;
@@ -129,15 +128,15 @@
     height: 38px;
     background-position: right 15px center;
   }
-  
+
   .search-field-group {
     width: 100%;
   }
-  
+
   .search-field-separator {
     display: none;
   }
-  
+
   .search-submit-button {
     width: 100%;
     justify-content: center;
@@ -153,7 +152,7 @@
     background-position: right 12px center;
     background-size: 10px;
   }
-  
+
   .search-submit-button {
     height: 36px;
     font-size: 0.8rem;

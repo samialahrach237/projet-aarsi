@@ -1,62 +1,118 @@
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-
-// استيراد ملفات التنسيق العامة
-import "./index.css"; 
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import "./index.css";
 import "./App.css";
-
-// استيراد المكونات الثابتة
-import Header from "./Components/Header";
 import Footer from "./Components/Footer";
-import ScrollToTop from "./Components/ScrollToTop"; // لحل مشكلة التمرير
+import Header from "./Components/Header";
 import ProtectedRoute from "./Components/ProtectedRoute";
+import ScrollToTop from "./Components/ScrollToTop";
 import ToastContainer from "./Components/ToastContainer";
-
-// استيراد الصفحات
 import Accueil from "./pages/Accueil";
-import Services from "./pages/Services";
-import ProviderProfile from "./pages/ProviderProfile"; // صفحة تفاصيل الخدمة
-import UserDashboard from "./pages/UserDashboard"; // لوحة تحكم المستخدم
-import Provider from "./pages/provider"; // صفحة Provider
-import ProviderDashboard from "./pages/ProviderDashboard"; // لوحة تحكم Provider
-
-import Admin from "./pages/Admin"; // صفحة Admin
-import AdminLogin from "./pages/AdminLogin"; // صفحة تسجيل دخول Admin
+import Admin from "./pages/Admin";
+import AdminLogin from "./pages/AdminLogin";
 import Avis from "./pages/Avis";
 import Connexion from "./pages/Connexion";
 import Contact from "./pages/Contact";
-import NotFound from "./pages/error"; // صفحة 404
+import MyAvis from "./pages/MyAvis";
+import NotFound from "./pages/error";
+import Profile from "./pages/Profile";
+import ProviderDashboard from "./pages/ProviderDashboard";
+import ProviderProfile from "./pages/ProviderProfile";
+import Provider from "./pages/provider";
 import Reservation from "./pages/Reservation";
+import Services from "./pages/Services";
+import UserDashboard from "./pages/UserDashboard";
+import {
+  bootstrapAuth,
+  clearAuthData,
+  getDefaultRouteForRole,
+  getStoredToken,
+  getStoredUser,
+} from "./services/authService";
 
+function RoleRedirect() {
+  const token = getStoredToken();
+  const user = getStoredUser();
+
+  if (!token || !user?.role) {
+    return <Navigate to="/connexion" replace />;
+  }
+
+  return <Navigate to={getDefaultRouteForRole(user.role)} replace />;
+}
 
 function App() {
+  const [isAuthReady, setIsAuthReady] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const syncAuthenticatedUser = async () => {
+      const token = getStoredToken();
+
+      if (!token) {
+        if (isMounted) {
+          setIsAuthReady(true);
+        }
+        return;
+      }
+
+      try {
+        await bootstrapAuth();
+      } catch (error) {
+        clearAuthData();
+      } finally {
+        if (isMounted) {
+          setIsAuthReady(true);
+        }
+      }
+    };
+
+    syncAuthenticatedUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (!isAuthReady) {
+    return null;
+  }
+
   return (
     <BrowserRouter>
-      {/* ScrollToTop يضمن أن الصفحة تبدأ من الأعلى عند الانتقال */}
       <ScrollToTop />
-
-      {/* الهيدر يظهر في جميع الصفحات */}
       <Header />
       <ToastContainer />
 
-      {/* تحديد المسارات */}
       <Routes>
         <Route path="/" element={<Accueil />} />
         <Route path="/services" element={<Services />} />
+        <Route path="/services/:id" element={<ProviderProfile />} />
         <Route path="/service/:id" element={<ProviderProfile />} />
+        <Route path="/dashboard" element={<RoleRedirect />} />
         <Route
-          path="/dashboard"
+          path="/user-dashboard"
           element={
-            <ProtectedRoute allowedRoles={["client"]}>
+            <ProtectedRoute requiredRole="client">
               <UserDashboard />
             </ProtectedRoute>
           }
         />
+        <Route path="/avis" element={<Avis />} />
         <Route
-          path="/user-dashboard"
+          path="/mes-avis"
           element={
-            <ProtectedRoute allowedRoles={["client"]}>
-              <UserDashboard />
+            <ProtectedRoute requiredRole="client">
+              <MyAvis />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute requiredRole="client">
+              <Profile />
             </ProtectedRoute>
           }
         />
@@ -64,36 +120,37 @@ function App() {
         <Route
           path="/provider-dashboard"
           element={
-            <ProtectedRoute allowedRoles={["prestataire"]}>
+            <ProtectedRoute requiredRole="prestataire">
               <ProviderDashboard />
             </ProtectedRoute>
           }
         />
         <Route
           path="/admin"
+          element={<RoleRedirect />}
+        />
+        <Route
+          path="/admin-dashboard"
           element={
-            <ProtectedRoute allowedRoles={["admin"]}>
+            <ProtectedRoute requiredRole="admin">
               <Admin />
             </ProtectedRoute>
           }
         />
         <Route path="/admin-login" element={<AdminLogin />} />
-        <Route path="/avis" element={<Avis />} />
         <Route path="/connexion" element={<Connexion />} />
         <Route path="/contact" element={<Contact />} />
         <Route
           path="/reservation/:id"
           element={
-            <ProtectedRoute allowedRoles={["client"]}>
+            <ProtectedRoute requiredRole="client">
               <Reservation />
             </ProtectedRoute>
           }
         />
-        {/* Catch-all route for 404 - must be last */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {/* الفوتر يظهر في جميع الصفحات */}
       <Footer />
     </BrowserRouter>
   );

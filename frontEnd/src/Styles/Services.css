@@ -4,7 +4,6 @@
   padding-bottom: 100px;
 }
 
-/* --- Premium Services Header --- */
 .services-header-premium {
   background: #ffffff;
   padding: 25px 20px 15px;
@@ -15,12 +14,12 @@
   font-size: 2.4rem;
   font-weight: 800;
   color: var(--color-text-main);
-  margin-bottom: 0px;
+  margin-bottom: 0;
   letter-spacing: -0.02em;
 }
 
 .search-bar-container-premium {
-  margin-bottom: 0px;
+  margin-bottom: 0;
   display: flex;
   justify-content: center;
   width: 100%;
@@ -30,7 +29,7 @@
   max-width: 1300px;
   margin: 0 auto;
   position: relative;
-  padding: 0px 20px;
+  padding: 0 20px;
 }
 
 .category-scroll-wrapper {
@@ -40,7 +39,7 @@
 
 .category-scroll-container {
   display: flex;
-  gap: 30px; /* Increased from 18px to 30px for more space between icons */
+  gap: 30px;
   overflow-x: auto;
   padding: 10px 0;
   scrollbar-width: none;
@@ -60,7 +59,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px; /* Increased from 10px to 15px for more space between icon and text */
+  gap: 15px;
   cursor: pointer;
   padding: 5px 12px;
   min-width: 90px;
@@ -120,13 +119,12 @@
   border-radius: 2px;
 }
 
-/* Mobile Scroll Right Indicator */
 .scroll-right-indicator {
   position: absolute;
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  background: linear-gradient(to left, rgba(255,255,255,0.95), transparent);
+  background: linear-gradient(to left, rgba(255, 255, 255, 0.95), transparent);
   padding: 20px 15px 20px 30px;
   pointer-events: none;
   z-index: 10;
@@ -138,9 +136,6 @@
   border-radius: 50%;
 }
 
-
-
-/* --- Service Grid --- */
 .services-grid-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -152,7 +147,6 @@
   z-index: 10;
 }
 
-/* --- Service Card Styles --- */
 .service-card-link {
   text-decoration: none;
   color: inherit;
@@ -178,7 +172,6 @@
   border-color: var(--color-gold);
 }
 
-/* --- Gallery Image Styling --- */
 .card-image {
   height: 170px;
   width: 100%;
@@ -344,7 +337,6 @@
   border-color: var(--color-gold);
 }
 
-/* --- Responsive Adjustments --- */
 @media (max-width: 1200px) {
   .services-grid-container {
     grid-template-columns: repeat(3, 1fr);
@@ -355,21 +347,24 @@
   .services-grid-container {
     grid-template-columns: repeat(2, 1fr);
   }
-  .page-title-premium { font-size: 2rem; }
-  
+
+  .page-title-premium {
+    font-size: 2rem;
+  }
+
   .category-btn-premium {
     min-width: 80px;
     padding: 5px 8px;
   }
-  
+
   .category-icon-premium {
     font-size: 1.5rem;
   }
-  
+
   .category-text-premium {
     font-size: 0.8rem;
   }
-  
+
   .scroll-right-indicator {
     padding: 15px 10px 15px 25px;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
@@ -381,33 +376,33 @@
   .services-grid-container {
     padding: 0 15px;
   }
-  
+
   .category-scroll-container {
     gap: 20px;
     padding: 8px 0;
   }
-  
+
   .category-btn-premium {
     min-width: 70px;
     gap: 8px;
     padding: 5px 6px;
   }
-  
+
   .category-icon {
     font-size: 1.2rem;
     height: 1.2rem;
   }
-  
+
   .category-text-premium {
     font-size: 0.75rem;
   }
-  
+
   .scroll-right-indicator {
     padding: 12px 8px 12px 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     border-radius: 50%;
   }
-  
+
   .scroll-right-indicator svg {
     width: 20px;
     height: 20px;
@@ -419,37 +414,37 @@
     grid-template-columns: 1fr;
     padding: 0 15px;
   }
-  
+
   .page-title-premium {
     font-size: 1.8rem;
   }
-  
+
   .category-scroll-container {
     gap: 16px;
     padding: 6px 0;
   }
-  
+
   .category-btn-premium {
     min-width: 65px;
     padding: 5px 6px;
     gap: 6px;
   }
-  
+
   .category-icon {
     font-size: 1.1rem;
     height: 1.1rem;
   }
-  
+
   .category-text-premium {
     font-size: 0.7rem;
   }
-  
+
   .scroll-right-indicator {
     padding: 10px 6px 10px 15px;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
     border-radius: 50%;
   }
-  
+
   .scroll-right-indicator svg {
     width: 18px;
     height: 18px;
@@ -460,19 +455,19 @@
   .services-grid-container {
     padding: 0 10px;
   }
-  
+
   .service-card {
     margin: 0 5px;
   }
-  
+
   .card-title {
     font-size: 1.05rem;
   }
-  
+
   .card-location {
     font-size: 0.8rem;
   }
-  
+
   .view-details-btn {
     font-size: 0.8rem;
     padding: 6px 12px;

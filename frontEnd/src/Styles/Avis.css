@@ -159,6 +159,15 @@
   box-shadow: 0 4px 10px rgba(197, 160, 89, 0.2);
 }
 
+.profile-photo-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #c5a059 0%, #9c7c3a 100%);
+  color: #fff;
+  font-weight: 700;
+}
+
 .review-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
@@ -252,6 +261,11 @@
   margin: 6px 0;
 }
 
+.review-star {
+  display: inline-block;
+  margin: 0 1px;
+}
+
 .voir-details-btn {
   background: transparent;
   border: 1px solid #c5a059;
@@ -275,6 +289,15 @@
   margin-top: 10px;
 }
 
+.avis-feedback-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  color: #64748b;
+  text-align: center;
+}
+
 .avis-footer-text {
   margin-top: 15px;
   font-size: 0.9rem;
@@ -294,6 +317,40 @@
   padding: 0;
   cursor: pointer;
   font: inherit;
+}
+
+.avis-section-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.avis-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.avis-section-header h3 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 1.1rem;
+}
+
+.avis-section-header span {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.avis-card-pending {
+  border-style: dashed;
+}
+
+.star.selected {
+  color: #fbbf24;
 }
 
 .avis-link:hover {

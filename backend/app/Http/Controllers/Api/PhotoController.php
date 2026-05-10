@@ -11,6 +11,20 @@ use Illuminate\Http\Request;
 
 class PhotoController extends Controller
 {
+    public function myPhotos(Request $request)
+    {
+        $prestataireId = $request->user()->prestataire?->user_id;
+
+        if ($request->user()->role !== 'prestataire' || !$prestataireId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        return $this->index($prestataireId);
+    }
+
     public function index(int $prestataireId)
     {
         $photos = Photo::query()

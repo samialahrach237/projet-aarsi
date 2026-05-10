@@ -1,341 +1,196 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { fetchPublicAvis } from "../services/api";
+import { getStoredUser, hasStoredToken } from "../services/authService";
 import "../Styles/Avis.css";
 
 function Avis() {
-  const [expandedReviews, setExpandedReviews] = useState({});
-  
-  // Load initial reviews from state/data
-  const [reviews, setReviews] = useState([
-    { 
-      id: 1, 
-      name: "Salma & Ahmed", 
-      city: "Casablanca",
-      profile: "Mariée",
-      comment: "Un service impeccable ! Merci AARSSI pour l'organisation parfaite de notre mariage. L'équipe a été professionnelle du début à la fin. Les prestataires étaient ponctuels et de qualité exceptionnelle.", 
-      rating: 5,
-      profilePhoto: "https://randomuser.me/api/portraits/women/1.jpg"
-    },
-    { 
-      id: 2, 
-      name: "Fatima E.", 
-      city: "Rabat",
-      profile: "Marié",
-      comment: "J'ai trouvé la meilleure Negafa grâce à vous. Le processus était simple et efficace. Je recommande vivement cette plateforme ! Le service client est exceptionnel et les prestataires sont fiables.", 
-      rating: 5,
-      profilePhoto: "https://randomuser.me/api/portraits/women/2.jpg"
-    },
-    { 
-      id: 3, 
-      name: "Karim T.", 
-      city: "Marrakech",
-      profile: "Famille des mariés",
-      comment: "Facile à utiliser et très professionnel. J'ai pu comparer plusieurs prestataires et choisir le meilleur pour mon événement. La plateforme offre une grande transparence sur les prix et les services.", 
-      rating: 4,
-      profilePhoto: "https://randomuser.me/api/portraits/men/3.jpg"
-    },
-    { 
-      id: 4, 
-      name: "Amal B.", 
-      city: "Fès",
-      profile: "Invité(e)",
-      comment: "Plateforme excellente avec une grande variété de services. La qualité des prestataires est remarquable. Expérience 5 étoiles ! J'ai adoré la facilité de recherche et la qualité des résultats.", 
-      rating: 5,
-      profilePhoto: "https://randomuser.me/api/portraits/women/4.jpg"
-    },
-    { 
-      id: 5, 
-      name: "Youssef M.", 
-      city: "Tanger",
-      profile: "Organisateur",
-      comment: "Très satisfait du service.", 
-      rating: 4,
-      profilePhoto: "https://randomuser.me/api/portraits/men/5.jpg"
-    },
-    { 
-      id: 6, 
-      name: "Nadia K.", 
-      city: "Agadir",
-      profile: "Prestataire",
-      comment: "Service client exceptionnel et prestataires de haute qualité. AARSSI m'a vraiment facilité la vie pour mon mariage. La visibilité offerte aux prestataires est formidable et les clients sont satisfaits.", 
-      rating: 5,
-      profilePhoto: "https://randomuser.me/api/portraits/women/6.jpg"
-    }
-  ]);
-  
-  const reviewsContainerRef = useRef(null);
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(true);
-  
-  // Function to update arrow visibility
-  const updateArrowsVisibility = useCallback(() => {
-    // Only show arrows on mobile devices
-    if (window.innerWidth <= 768 && reviewsContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = reviewsContainerRef.current;
-      setShowLeftArrow(scrollLeft > 5);
-      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 5);
-    } else {
-      setShowLeftArrow(false);
-      setShowRightArrow(false);
-    }
-  }, []);
-  
-  // Function to scroll left
-  const scrollLeft = () => {
-    if (reviewsContainerRef.current) {
-      reviewsContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' });
-    }
-  };
-  
-  // Function to scroll right
-  const scrollRight = () => {
-    if (reviewsContainerRef.current) {
-      reviewsContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' });
-    }
-  };
-  
-  // Effect to update arrows visibility on scroll
-  useEffect(() => {
-    const container = reviewsContainerRef.current;
-    if (container) {
-      container.addEventListener('scroll', updateArrowsVisibility);
-      // Initial check
-      updateArrowsVisibility();
-      
-      return () => {
-        container.removeEventListener('scroll', updateArrowsVisibility);
-      };
-    }
-  }, [updateArrowsVisibility]);
-  
-  // Effect to update arrows visibility when reviews change
-  useEffect(() => {
-    // Delay to ensure DOM is updated
-    setTimeout(updateArrowsVisibility, 100);
-  }, [reviews, updateArrowsVisibility]);
-  
-  const navigate = useNavigate();
+  const scrollRef = useRef(null);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const renderStars = (rating) => {
-    return '⭐'.repeat(rating);
-  };
-  
-  const toggleExpand = (reviewId) => {
-    setExpandedReviews(prev => ({
-      ...prev,
-      [reviewId]: !prev[reviewId]
-    }));
-  };
-  
-  const truncateComment = (comment, maxLength = 100) => {
-    if (comment.length <= maxLength) return comment;
-    return comment.substring(0, maxLength) + '...';
-  };
+  useEffect(() => {
+    const loadReviews = async () => {
+      setLoading(true);
+      setError("");
 
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewForm, setReviewForm] = useState({
-    platform: 'platform-AARSSI',
-    rating: 5,
-    review: ''
-  });
-  
-  const handleLeaveReview = () => {
-    // Check if user is logged in (using localStorage for testing)
-    const isLoggedIn = localStorage.getItem('userToken') !== null;
-    
-    if (!isLoggedIn) {
-      // Redirect to login page
-      navigate('/connexion');
-      return;
-    }
-    
-    // Show review modal
-    setShowReviewModal(true);
-  };
-  
-  const handleFormChange = (field, value) => {
-    setReviewForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-  
-  const handleSubmitReview = (e) => {
-    e.preventDefault();
-    
-    // Validation
-    if (!reviewForm.rating) {
-      alert('Veuillez donner une note');
-      return;
-    }
-    
-    if (!reviewForm.review.trim()) {
-      alert('Veuillez écrire votre avis');
-      return;
-    }
-    
-    // Get user data from localStorage
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    
-    // Create new review object
-    const newReview = {
-      id: Date.now(), // Use timestamp for unique ID
-      name: userData.email ? userData.email.split('@')[0] : 'Utilisateur', // Extract name from email
-      city: "Maroc", // Default city, could be enhanced later
-      profile: "Client", // Default profile
-      comment: reviewForm.review,
-      rating: reviewForm.rating,
-      profilePhoto: "https://randomuser.me/api/portraits/lego/1.jpg" // Default profile photo
+      try {
+        const data = await fetchPublicAvis();
+        setReviews(Array.isArray(data) ? data : []);
+      } catch (requestError) {
+        setError(
+          requestError?.response?.data?.message ||
+            "Impossible de charger les avis pour le moment."
+        );
+      } finally {
+        setLoading(false);
+      }
     };
-    
-    // Add the new review to the reviews array
-    setReviews(prevReviews => [newReview, ...prevReviews]);
-    
-    // Handle form submission
-    // Reset form and close modal
-    setReviewForm({ platform: 'platform-AARSSI', rating: 5, review: '' });
-    setShowReviewModal(false);
-    
-    alert('Votre avis a été soumis avec succès !');
+
+    loadReviews();
+  }, []);
+
+  const repeatedReviews = useMemo(() => {
+    if (!reviews.length) {
+      return [];
+    }
+
+    return [...reviews, ...reviews];
+  }, [reviews]);
+
+  const isAuthenticated = hasStoredToken();
+  const currentUser = getStoredUser();
+  const avisCtaPath =
+    isAuthenticated && currentUser?.role === "client" ? "/mes-avis" : "/connexion";
+
+  const scrollByCard = (direction) => {
+    const container = scrollRef.current;
+    if (!container) {
+      return;
+    }
+
+    container.scrollBy({
+      left: direction * 340,
+      behavior: "smooth",
+    });
   };
-  
-  const handleCloseModal = () => {
-    setReviewForm({ platform: 'platform-AARSSI', rating: 5, review: '' });
-    setShowReviewModal(false);
-  };
+
+  const renderStars = (rating) =>
+    [1, 2, 3, 4, 5].map((star) => (
+      <span key={star} className="review-star">
+        {star <= Number(rating || 0) ? "★" : "☆"}
+      </span>
+    ));
+
+  const initialsFor = (name) =>
+    String(name || "AA")
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part.charAt(0).toUpperCase())
+      .join("");
 
   return (
-    <div className="avis-page">
+    <section className="avis-page">
       <div className="avis-header">
-        <h1 className="avis-title">Ce que nos clients disent de l'expérience AARSSI</h1>
-        <p className="avis-subtitle">Plus de 500 mariages et événements réussis grâce 
-          à nos prestataires certifiés</p>
-      </div>
-
-      <div className="reviews-container">
-        <div className="reviews-scroll-wrapper-relative">
-          <div 
-            className="reviews-scroll-wrapper" 
-            ref={reviewsContainerRef}
-          >
-            {reviews.map((review) => (
-              <div key={review.id} className="review-card">
-                <div className="review-profile-section">
-                  <div className="reviewer-avatar-centered">
-                    <img src={review.profilePhoto} alt={review.name} className="profile-photo" />
-                  </div>
-                  <div className="reviewer-info-centered">
-                    <h3 className="reviewer-name">{review.name}</h3>
-                    <div className="reviewer-meta">
-                      <span className="reviewer-profile">{review.profile}</span>
-                      <span className="reviewer-city">• {review.city}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="review-rating">
-                  {renderStars(review.rating)}
-                </div>
-                <div className="review-content">
-                  <p className="review-comment">"{expandedReviews[review.id] ? review.comment : truncateComment(review.comment)}"</p>
-                </div>
-                <button className="voir-details-btn" onClick={() => toggleExpand(review.id)}>
-                  {expandedReviews[review.id] ? "Réduire" : "Voir détails"}
-                </button>
-              </div>
-            ))}
-          </div>
-          
-          {showLeftArrow && (
-            <button className="scroll-arrow left" onClick={scrollLeft}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 18L9 12L15 6" stroke="#c5a059" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          )}
-          
-          {showRightArrow && (
-            <button className="scroll-arrow right" onClick={scrollRight}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 18L15 12L9 6" stroke="#c5a059" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          )}
-        </div>
-      </div>
-      
-      <div className="avis-action">
-        <button className="donner-avis-btn" onClick={() => navigate('/services')}>
-          Trouver Mon Prestataire 
-        </button>
-        <p className="avis-footer-text">
-          vous avez déjà utiliser AARSSI ?
-          <button type="button" className="avis-link avis-link-button" onClick={handleLeaveReview}>
-            laissez un avis
-          </button>
+        <h1 className="avis-title">Ce que nos clients disent de l&apos;experience AARSSI</h1>
+        <p className="avis-subtitle">
+          Plus de {reviews.length || 0} avis verifies laisses par nos clients
+          depuis la plateforme.
         </p>
       </div>
-      
-      {/* Review Modal */}
-      {showReviewModal && (
-        <div className="review-modal-overlay" onMouseDown={handleCloseModal}>
-          <form className="review-form" onSubmit={handleSubmitReview} onMouseDown={(e) => e.stopPropagation()}>
-            <div className="form-group">
-              <div className="form-header">
-                <div className="form-title">
-                  <h2>Laisser un avis</h2>
-                </div>
-                <button type="button" className="form-reduire-icon" onClick={handleCloseModal} aria-label="Fermer">×</button>
-              </div>
-              <label htmlFor="platform">Plateforme:</label>
-              <input
-                type="text"
-                id="platform"
-                value={reviewForm.platform}
-                readOnly
-                className="form-input-read-only"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="rating">Votre avis (Notez sur 5 étoiles):</label>
-              <div className="star-rating">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <span 
-                    key={star}
-                    className={`star ${star <= reviewForm.rating ? 'filled' : ''}`}
-                    onClick={() => handleFormChange('rating', star)}
-                  >
-                    ★
-                  </span>
+
+      {loading ? (
+        <div className="avis-feedback-state">
+          <p>Chargement des avis...</p>
+        </div>
+      ) : error ? (
+        <div className="avis-feedback-state">
+          <p>{error}</p>
+        </div>
+      ) : reviews.length ? (
+        <>
+          <div className="reviews-container">
+            <div className="reviews-scroll-wrapper-relative">
+              <button
+                type="button"
+                className="scroll-arrow left"
+                onClick={() => scrollByCard(-1)}
+                aria-label="Avis precedents"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M15 18L9 12L15 6"
+                    stroke="#C5A059"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+
+              <div className="reviews-scroll-wrapper" ref={scrollRef}>
+                {repeatedReviews.map((review, index) => (
+                  <article className="review-card" key={`${review.id}-${index}`}>
+                    <div className="review-profile-section">
+                      <div className="reviewer-avatar-centered">
+                        {review.provider_image ? (
+                          <img
+                            src={review.provider_image}
+                            alt={review.provider_name}
+                            className="profile-photo"
+                          />
+                        ) : (
+                          <div className="profile-photo profile-photo-fallback">
+                            {initialsFor(review.client_name)}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="reviewer-info-centered">
+                        <h3 className="reviewer-name">{review.client_name}</h3>
+                        <div className="reviewer-meta">
+                          <span className="reviewer-profile">
+                            {review.service_category || "Service"}
+                          </span>
+                          <span className="reviewer-city">• {review.client_city}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="review-rating-bottom">{renderStars(review.rating)}</div>
+
+                    <div className="review-content">
+                      <p className="review-comment">
+                        &quot;{review.comment || "Tres satisfait du service."}&quot;
+                      </p>
+                    </div>
+
+                    <button type="button" className="voir-details-btn">
+                      {review.provider_name}
+                    </button>
+                  </article>
                 ))}
               </div>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="review">Votre avis:</label>
-              <textarea 
-                id="review"
-                placeholder="Racontez-nous votre expérience..."
-                value={reviewForm.review}
-                onChange={(e) => handleFormChange('review', e.target.value)}
-                maxLength="500"
-                rows="4"
-                required
-              ></textarea>
-            </div>
-            
-            <div className="form-actions">
-              <button type="button" className="cancel-btn" onClick={handleCloseModal}>
-                Annuler
-              </button>
-              <button type="submit" className="submit-btn">
-                Publiée
+
+              <button
+                type="button"
+                className="scroll-arrow right"
+                onClick={() => scrollByCard(1)}
+                aria-label="Avis suivants"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M9 18L15 12L9 6"
+                    stroke="#C5A059"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </button>
             </div>
-          </form>
+          </div>
+
+          <div className="avis-action">
+            <Link to="/services" className="donner-avis-btn">
+              Trouver Mon Prestataire
+            </Link>
+            <p className="avis-footer-text">
+              vous avez deja utiliser AARSSI ?
+              <Link to={avisCtaPath} className="avis-link">
+                laisser un avis
+              </Link>
+            </p>
+          </div>
+        </>
+      ) : (
+        <div className="avis-feedback-state">
+          <p>Aucun avis disponible pour le moment.</p>
         </div>
       )}
-    </div>
+    </section>
   );
 }
 

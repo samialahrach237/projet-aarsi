@@ -11,9 +11,14 @@ function PrestataireCard({
   description,
   primaryService,
   rating,
+  reviews = 0,
   image = FALLBACK_IMAGE,
 }) {
   const targetPath = primaryService?.id ? `/service/${primaryService.id}` : `/services`;
+  const categoryLabel =
+    typeof primaryService?.category === "object"
+      ? primaryService?.category?.name || primaryService?.category?.title || primaryService?.category?.slug || "Prestataire"
+      : primaryService?.category || "Prestataire";
 
   return (
     <Link to={targetPath} className="service-card-link">
@@ -28,7 +33,7 @@ function PrestataireCard({
               event.currentTarget.src = FALLBACK_IMAGE;
             }}
           />
-          <span className="category-tag">{primaryService?.category || "Prestataire"}</span>
+          <span className="category-tag">{categoryLabel}</span>
         </div>
 
         <div className="card-content">
@@ -43,21 +48,24 @@ function PrestataireCard({
               {primaryService?.name || "Service sur demande"}
             </span>
             <span className="prestataire-service-count">
-              {id ? `${primaryService?.totalServices || 1} services` : "1 service"}
+              {primaryService?.totalServices || 1} service
+              {(primaryService?.totalServices || 1) > 1 ? "s" : ""}
             </span>
           </div>
 
           <div className="card-rating">
-            <span className="stars">{"★".repeat(Math.floor(rating))}</span>
-            <span className="rating-value">{rating.toFixed(1)}</span>
-            <span className="rating-count">(Avis verifies bientot)</span>
+            <span className="stars">
+              {"★".repeat(Math.max(1, Math.floor(Number(rating || 0))))}
+            </span>
+            <span className="rating-value">{Number(rating || 0).toFixed(1)}</span>
+            <span className="rating-count">({reviews} Avis)</span>
           </div>
 
           <div className="card-footer">
             <div className="price-container">
               <span className="price-label">A partir de</span>
               <span className="price-tag">
-                {primaryService?.price?.toLocaleString("fr-FR") || "0"} MAD
+                {Number(primaryService?.price || 0).toLocaleString("fr-FR")} MAD
               </span>
             </div>
             <div className="view-details-btn">Voir ↗</div>

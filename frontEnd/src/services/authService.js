@@ -1,12 +1,17 @@
-import api from "./api";
+import api, { fetchCurrentUser } from "./api";
 
 const TOKEN_KEY = "auth_token";
-const USER_KEY = "userData";
+const USER_KEY = "user";
+const LEGACY_USER_KEY = "userData";
+
+let activeUserRefreshPromise = null;
 
 export const getStoredToken = () => localStorage.getItem(TOKEN_KEY);
 
+export const hasStoredToken = () => Boolean(getStoredToken());
+
 export const getStoredUser = () => {
-  const rawUser = localStorage.getItem(USER_KEY);
+  const rawUser = localStorage.getItem(USER_KEY) || localStorage.getItem(LEGACY_USER_KEY);
 
   if (!rawUser) {
     return null;
@@ -16,8 +21,32 @@ export const getStoredUser = () => {
     return JSON.parse(rawUser);
   } catch (error) {
     localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(LEGACY_USER_KEY);
     return null;
   }
+};
+
+export const storeUserData = (user) => {
+  if (!user) {
+    return null;
+  }
+
+  const normalizedUser = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone ?? null,
+    city: user.city ?? null,
+    created_at: user.created_at ?? null,
+    role: user.role ?? null,
+    client: user.client ?? null,
+    prestataire: user.prestataire ?? null,
+  };
+
+  localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
+  localStorage.setItem(LEGACY_USER_KEY, JSON.stringify(normalizedUser));
+
+  return normalizedUser;
 };
 
 export const storeAuthData = ({ token, user }) => {
@@ -26,17 +55,7 @@ export const storeAuthData = ({ token, user }) => {
   }
 
   if (user) {
-    localStorage.setItem(
-      USER_KEY,
-      JSON.stringify({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        client: user.client ?? null,
-        prestataire: user.prestataire ?? null,
-      })
-    );
+    storeUserData(user);
   }
 
   window.dispatchEvent(new Event("auth:changed"));
@@ -45,6 +64,7 @@ export const storeAuthData = ({ token, user }) => {
 export const clearAuthData = () => {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(LEGACY_USER_KEY);
   sessionStorage.removeItem("isAdminAuthenticated");
   sessionStorage.removeItem("isProviderAuthenticated");
   window.dispatchEvent(new Event("auth:changed"));
@@ -56,28 +76,65 @@ export const getDefaultRouteForRole = (role) => {
   }
 
   if (role === "admin") {
-    return "/admin";
+    return "/admin-dashboard";
   }
 
   return "/user-dashboard";
 };
 
+export const refreshStoredUser = async () => {
+  if (!getStoredToken()) {
+    clearAuthData();
+    return null;
+  }
+
+  if (!activeUserRefreshPromise) {
+    activeUserRefreshPromise = fetchCurrentUser()
+      .then((user) => {
+        const normalizedUser = storeUserData(user);
+        window.dispatchEvent(new Event("auth:changed"));
+        return normalizedUser;
+      })
+      .catch((error) => {
+        clearAuthData();
+        throw error;
+      })
+      .finally(() => {
+        activeUserRefreshPromise = null;
+      });
+  }
+
+  return activeUserRefreshPromise;
+};
+
+const loginRequest = async ({ email, password }) => api.post("/login", { email, password });
+
 export const loginUser = async (email, password) => {
-  const response = await api.post("/login", { email, password });
+  const response = await loginRequest({ email, password });
   const { user, token } = response.data;
 
-  storeAuthData({ user, token });
+  storeAuthData({ token, user });
 
-  return response.data;
+  const refreshedUser = await refreshStoredUser();
+
+  return {
+    ...response.data,
+    user: refreshedUser ?? user ?? null,
+  };
 };
 
 export const registerUser = async (payload) => {
   const response = await api.post("/register", payload);
   const { user, token } = response.data;
 
-  storeAuthData({ user, token });
+  storeAuthData({ token, user });
 
-  return response.data;
+  const refreshedUser = await refreshStoredUser();
+
+  return {
+    ...response.data,
+    user: refreshedUser ?? user ?? null,
+  };
 };
 
 export const logoutUser = async () => {
@@ -92,6 +149,15 @@ export const logoutUser = async () => {
   }
 };
 
+export const bootstrapAuth = async () => {
+  if (!getStoredToken()) {
+    clearAuthData();
+    return null;
+  }
+
+  return refreshStoredUser();
+};
+
 export const forceLogout = (redirectTo = "/connexion") => {
   clearAuthData();
 
@@ -100,4 +166,4 @@ export const forceLogout = (redirectTo = "/connexion") => {
   }
 };
 
-export const isAuthenticated = () => Boolean(getStoredToken() && getStoredUser());
+export const isAuthenticated = () => hasStoredToken();

@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
@@ -11,10 +10,31 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
+    private const CITIES = [
+        'Casablanca',
+        'Rabat',
+        'Marrakech',
+        'Tanger',
+        'Fes',
+        'Agadir',
+        'Meknes',
+        'Oujda',
+    ];
+
+    private const MOROCCAN_NAMES = [
+        'Yassine El Idrissi',
+        'Salma Benjelloun',
+        'Amina El Fassi',
+        'Omar Alaoui',
+        'Nour El Mansouri',
+        'Sofia Amrani',
+        'Mehdi Chraibi',
+        'Khadija Tazi',
+        'Imane Berrada',
+        'Ayoub Sqalli',
+        'Meryem Zahraoui',
+        'Hamza El Ghazali',
+    ];
 
     /**
      * Define the model's default state.
@@ -24,13 +44,30 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'name' => fake()->randomElement(self::MOROCCAN_NAMES),
             'email' => fake()->unique()->safeEmail(),
+            'phone' => fake()->numerify('06########'),
+            'city' => fake()->randomElement(self::CITIES),
             'email_verified_at' => now(),
-            'role'=>"admin",
-            'password' => static::$password ??= Hash::make('password'),
+            'role' => 'client',
+            'password' => 'Password@123',
             'remember_token' => Str::random(10),
         ];
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn () => ['role' => 'admin']);
+    }
+
+    public function client(): static
+    {
+        return $this->state(fn () => ['role' => 'client']);
+    }
+
+    public function prestataire(): static
+    {
+        return $this->state(fn () => ['role' => 'prestataire']);
     }
 
     /**

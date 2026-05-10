@@ -18,7 +18,9 @@ class UpdateServiceRequest extends FormRequest
             'description' => ['sometimes', 'nullable', 'string'],
             'price' => ['sometimes', 'numeric', 'min:0'],
             'duration' => ['sometimes', 'integer', 'min:1'],
-            'category' => ['sometimes', 'string', 'max:255'],
+            'category' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'category_id' => ['sometimes', 'nullable', 'exists:categories,id'],
+            'image' => ['sometimes', 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
     }
 }

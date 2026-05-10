@@ -33,7 +33,7 @@ function AdminLogin() {
           },
         })
       );
-      navigate("/admin");
+      navigate("/admin-dashboard");
     } catch (err) {
       setError(getApiErrorMessage(err, "Email ou mot de passe incorrect."));
     } finally {

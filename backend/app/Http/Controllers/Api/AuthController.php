@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\Client;
 use App\Models\Prestataire;
@@ -13,6 +12,22 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    protected function formatAuthenticatedUser(User $user): array
+    {
+        $user->loadMissing(['client', 'prestataire']);
+
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'phone' => $user->phone,
+            'city' => $user->city,
+            'client' => $user->client,
+            'prestataire' => $user->prestataire,
+        ];
+    }
+
     public function register(RegisterRequest $request)
     {
         $data = $request->validated();
@@ -42,36 +57,39 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = $user->createToken('api')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'success' => true,
             'message' => 'Registration successful.',
-            'user' => $user->load(['client', 'prestataire']),
+            'user' => $this->formatAuthenticatedUser($user),
             'token' => $token,
         ], 201);
     }
 
-    public function login(LoginRequest $request)
+    public function login(Request $request)
     {
-        $credentials = $request->validated();
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-        $user = User::where('email', $credentials['email'])->first();
+        $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
-                'success' => false,
-                'message' => 'Invalid credentials.',
+                'message' => 'Invalid credentials'
             ], 401);
         }
 
-        $token = $user->createToken('api')->plainTextToken;
+        $user->tokens()->delete();
+
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'success' => true,
-            'message' => 'Login successful.',
-            'user' => $user->load(['client', 'prestataire']),
             'token' => $token,
+            'user' => $this->formatAuthenticatedUser($user),
         ]);
     }
 
@@ -79,7 +97,7 @@ class AuthController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data' => $request->user()->load(['client', 'prestataire']),
+            'data' => $this->formatAuthenticatedUser($request->user()),
         ]);
     }
 

@@ -11,20 +11,31 @@ class Service extends Model
 
     protected $fillable = [
         'prestataire_id',
+        'category_id',
         'name',
         'description',
         'price',
         'duration',
         'category',
+        'image',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
     ];
 
+    protected $appends = [
+        'image_url',
+    ];
+
     public function prestataire()
     {
         return $this->belongsTo(Prestataire::class, 'prestataire_id', 'user_id');
+    }
+
+    public function categoryModel()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function reservations()
@@ -35,5 +46,14 @@ class Service extends Model
     public function avis()
     {
         return $this->hasMany(Avis::class, 'service_id');
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        return asset('storage/' . ltrim($this->image, '/'));
     }
 }

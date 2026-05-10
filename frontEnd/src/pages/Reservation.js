@@ -1,43 +1,60 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { fetchServiceById, createReservation } from '../services/api';
-import '../Styles/Reservation.css';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { createReservation, fetchServiceById } from "../services/api";
+import { getStoredUser, refreshStoredUser } from "../services/authService";
+import "../Styles/Reservation.css";
+
+const buildInitialFormData = () => {
+  const storedUser = getStoredUser();
+
+  return {
+    fullName: storedUser?.name || "",
+    email: storedUser?.email || "",
+    phone: storedUser?.phone || "",
+    city: storedUser?.city || "",
+    date: "",
+    time: "",
+    guests: "2",
+    notes: "",
+  };
+};
+
+const getCategoryLabel = (category) => {
+  if (typeof category === "object") {
+    return category?.name || category?.title || category?.slug || "Service";
+  }
+
+  return category || "Service";
+};
 
 function Reservation() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [apiError, setApiError] = useState('');
-  const [formData, setFormData] = useState({
-    fullName: '',
-    phone: '',
-    email: '',
-    date: '',
-    time: '',
-    guests: '2',
-    notes: ''
-  });
+  const [apiError, setApiError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [formData, setFormData] = useState(buildInitialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const loadService = async () => {
       setLoading(true);
-      setApiError('');
+      setApiError("");
+
       try {
-        const response = await fetchServiceById(id);
-        const data = response?.data;
+        const data = await fetchServiceById(id);
+
         if (data) {
           setService(data);
         } else {
-          navigate('/services');
+          navigate("/services");
         }
-      } catch (err) {
-        const message =
-          err?.response?.data?.message || "Service introuvable.";
+      } catch (error) {
+        const message = error?.response?.data?.message || "Service introuvable.";
         setApiError(message);
-        navigate('/services');
+        navigate("/services");
       } finally {
         setLoading(false);
       }
@@ -47,93 +64,133 @@ function Reservation() {
   }, [id, navigate]);
 
   const validateForm = () => {
-    const newErrors = {};
-    
+    const nextErrors = {};
+
     if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Le nom complet est requis';
+      nextErrors.fullName = "Le nom complet est requis";
     }
-    
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Le numéro de téléphone est requis';
-    } else if (!/^[+]?[0-9\s-]{10,}$/.test(formData.phone)) {
-      newErrors.phone = 'Numéro de téléphone invalide';
-    }
-    
+
     if (!formData.email.trim()) {
-      newErrors.email = 'L\'email est requis';
+      nextErrors.email = "L'email est requis";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email invalide';
+      nextErrors.email = "Email invalide";
     }
-    
+
+    if (!formData.phone.trim()) {
+      nextErrors.phone = "Le numero de telephone est requis";
+    } else if (!/^[+]?[0-9\s-]{10,}$/.test(formData.phone)) {
+      nextErrors.phone = "Numero de telephone invalide";
+    }
+
+    if (!formData.city.trim()) {
+      nextErrors.city = "La ville est requise";
+    }
+
     if (!formData.date) {
-      newErrors.date = 'La date est requise';
+      nextErrors.date = "La date est requise";
     } else {
       const selectedDate = new Date(formData.date);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       if (selectedDate < today) {
-        newErrors.date = 'La date ne peut pas être dans le passé';
+        nextErrors.date = "La date ne peut pas etre dans le passe";
       }
     }
-    
+
     if (!formData.time) {
-      newErrors.time = 'L\'heure est requise';
+      nextErrors.time = "L'heure est requise";
     }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    if (!formData.guests || Number(formData.guests) < 1) {
+      nextErrors.guests = "Le nombre d'invites doit etre superieur a 0";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
     }));
-    
-    // Clear error when user starts typing
+
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
+      setErrors((current) => ({
+        ...current,
+        [name]: "",
       }));
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+    setApiError("");
+    setSuccessMessage("");
+
     try {
       const duration = service?.duration ? Number(service.duration) : 60;
       const addMinutesToTime = (time, minutes) => {
-        const [h, m] = time.split(":").map(Number);
-        const total = h * 60 + m + minutes;
-        const newH = Math.floor((total % 1440) / 60);
-        const newM = total % 60;
-        return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
+        const [hours, mins] = time.split(":").map(Number);
+        const total = hours * 60 + mins + minutes;
+        const nextHours = Math.floor((total % 1440) / 60);
+        const nextMinutes = total % 60;
+
+        return `${String(nextHours).padStart(2, "0")}:${String(nextMinutes).padStart(2, "0")}`;
       };
 
       await createReservation({
+        full_name: formData.fullName.trim(),
+        email: formData.email.trim(),
         service_id: service.id,
-        date: formData.date,
+        reservation_date: formData.date,
+        reservation_time: formData.time,
         start_time: formData.time,
         end_time: addMinutesToTime(formData.time, duration),
+        guests: Number(formData.guests),
+        phone: formData.phone.trim(),
+        city: formData.city.trim(),
+        message: formData.notes.trim(),
       });
 
-      alert('✅ Réservation envoyée avec succès! Nous vous contacterons bientôt.');
-      navigate('/dashboard');
-      
+      await refreshStoredUser().catch(() => null);
+
+      setSuccessMessage("Reservation envoyee avec succes. Redirection vers votre tableau de bord...");
+
+      setTimeout(() => {
+        navigate("/user-dashboard");
+      }, 1600);
     } catch (error) {
-      const message =
-        error?.response?.data?.message || '❌ Une erreur est survenue. Veuillez réessayer.';
-      alert(message);
+      const responseErrors = error?.response?.data?.errors;
+      const message = error?.response?.data?.message || "Une erreur est survenue. Veuillez reessayer.";
+
+      if (responseErrors && typeof responseErrors === "object") {
+        const fieldMap = {
+          full_name: "fullName",
+          reservation_date: "date",
+          reservation_time: "time",
+          message: "notes",
+        };
+
+        setErrors((current) => ({
+          ...current,
+          ...Object.entries(responseErrors).reduce((acc, [field, messages]) => {
+            acc[fieldMap[field] || field] = Array.isArray(messages) ? messages[0] : messages;
+            return acc;
+          }, {}),
+        }));
+      }
+
+      setApiError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -142,7 +199,7 @@ function Reservation() {
   if (loading || !service) {
     return (
       <div className="reservation-loading">
-        <div className="loading-spinner"></div>
+        <div className="loading-spinner" />
         <p>{apiError || "Chargement du service..."}</p>
       </div>
     );
@@ -152,14 +209,13 @@ function Reservation() {
     <div className="reservation-page">
       <div className="reservation-container">
         <div className="reservation-header">
-          <h1>Réserver {service.name}</h1>
+          <h1>Reserver {service.name}</h1>
           <p className="service-category">
-            {service.category} • {service?.prestataire?.adresse || "Maroc"}
+            {getCategoryLabel(service?.category)} - {service?.provider?.city || service?.provider?.address || "Maroc"}
           </p>
         </div>
 
         <div className="reservation-content">
-          {/* Service Preview */}
           <div className="service-preview">
             <div className="service-image">
               <img
@@ -172,17 +228,24 @@ function Reservation() {
             </div>
             <div className="service-details">
               <h3>{service.name}</h3>
-              <p className="service-price">{Number(service.price || 0).toLocaleString()} MAD</p>
+              <p className="service-price">
+                {Number(service.price || 0).toLocaleString("fr-FR")} MAD
+              </p>
               <div className="service-rating">
-                <span className="stars">{"★".repeat(5)}</span>
-                <span className="rating-value">{service.rating || 5}</span>
+                <span className="stars">
+                  {"*".repeat(Math.max(1, Math.floor(Number(service.rating || 0))))}
+                </span>
+                <span className="rating-value">
+                  {Number(service.rating || 0).toFixed(1)}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Reservation Form */}
           <div className="reservation-form-container">
-            <h2>Informations de réservation</h2>
+            <h2>Informations de reservation</h2>
+            {apiError ? <div className="form-error-banner">{apiError}</div> : null}
+            {successMessage ? <div className="form-success-banner">{successMessage}</div> : null}
             <form className="reservation-form" onSubmit={handleSubmit}>
               <div className="form-row">
                 <div className="form-group">
@@ -193,39 +256,55 @@ function Reservation() {
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleChange}
-                    className={errors.fullName ? 'error' : ''}
+                    className={errors.fullName ? "error" : ""}
                     placeholder="Votre nom complet"
                   />
-                  {errors.fullName && <span className="error-message">{errors.fullName}</span>}
+                  {errors.fullName ? <span className="error-message">{errors.fullName}</span> : null}
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="phone">Téléphone *</label>
+                  <label htmlFor="email">Email *</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={errors.email ? "error" : ""}
+                    placeholder="votre@email.com"
+                  />
+                  {errors.email ? <span className="error-message">{errors.email}</span> : null}
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="phone">Telephone *</label>
                   <input
                     type="tel"
                     id="phone"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className={errors.phone ? 'error' : ''}
+                    className={errors.phone ? "error" : ""}
                     placeholder="+212 6 XX XX XX XX"
                   />
-                  {errors.phone && <span className="error-message">{errors.phone}</span>}
+                  {errors.phone ? <span className="error-message">{errors.phone}</span> : null}
                 </div>
-              </div>
 
-              <div className="form-group">
-                <label htmlFor="email">Email *</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={errors.email ? 'error' : ''}
-                  placeholder="votre@email.com"
-                />
-                {errors.email && <span className="error-message">{errors.email}</span>}
+                <div className="form-group">
+                  <label htmlFor="city">Ville *</label>
+                  <input
+                    type="text"
+                    id="city"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    className={errors.city ? "error" : ""}
+                    placeholder="Casablanca, Marrakech, Rabat..."
+                  />
+                  {errors.city ? <span className="error-message">{errors.city}</span> : null}
+                </div>
               </div>
 
               <div className="form-row">
@@ -237,10 +316,10 @@ function Reservation() {
                     name="date"
                     value={formData.date}
                     onChange={handleChange}
-                    className={errors.date ? 'error' : ''}
-                    min={new Date().toISOString().split('T')[0]}
+                    className={errors.date ? "error" : ""}
+                    min={new Date().toISOString().split("T")[0]}
                   />
-                  {errors.date && <span className="error-message">{errors.date}</span>}
+                  {errors.date ? <span className="error-message">{errors.date}</span> : null}
                 </div>
 
                 <div className="form-group">
@@ -250,9 +329,9 @@ function Reservation() {
                     name="time"
                     value={formData.time}
                     onChange={handleChange}
-                    className={errors.time ? 'error' : ''}
+                    className={errors.time ? "error" : ""}
                   >
-                    <option value="">Sélectionnez une heure</option>
+                    <option value="">Selectionnez une heure</option>
                     <option value="09:00">09:00</option>
                     <option value="10:00">10:00</option>
                     <option value="11:00">11:00</option>
@@ -261,34 +340,39 @@ function Reservation() {
                     <option value="16:00">16:00</option>
                     <option value="17:00">17:00</option>
                   </select>
-                  {errors.time && <span className="error-message">{errors.time}</span>}
+                  {errors.time ? <span className="error-message">{errors.time}</span> : null}
                 </div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="guests">Nombre de personnes</label>
+                <label htmlFor="guests">Nombre de personnes *</label>
                 <select
                   id="guests"
                   name="guests"
                   value={formData.guests}
                   onChange={handleChange}
+                  className={errors.guests ? "error" : ""}
                 >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                    <option key={num} value={num}>{num} personne{num > 1 ? 's' : ''}</option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((number) => (
+                    <option key={number} value={number}>
+                      {number} personne{number > 1 ? "s" : ""}
+                    </option>
                   ))}
                 </select>
+                {errors.guests ? <span className="error-message">{errors.guests}</span> : null}
               </div>
 
               <div className="form-group">
-                <label htmlFor="notes">Notes supplémentaires</label>
+                <label htmlFor="notes">Message / notes</label>
                 <textarea
                   id="notes"
                   name="notes"
                   value={formData.notes}
                   onChange={handleChange}
-                  placeholder="Précisions sur votre demande, préférences spéciales, etc."
+                  placeholder="Precisions sur votre demande, preferences speciales, etc."
                   rows="4"
                 />
+                {errors.notes ? <span className="error-message">{errors.notes}</span> : null}
               </div>
 
               <div className="form-actions">
@@ -300,12 +384,8 @@ function Reservation() {
                 >
                   Annuler
                 </button>
-                <button
-                  type="submit"
-                  className="btn-reserve"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Envoi en cours...' : 'Confirmer la réservation'}
+                <button type="submit" className="btn-reserve" disabled={isSubmitting}>
+                  {isSubmitting ? "Envoi en cours..." : "Confirmer la reservation"}
                 </button>
               </div>
             </form>

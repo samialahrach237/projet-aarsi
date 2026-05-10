@@ -34,7 +34,6 @@
   align-items: start;
 }
 
-/* Service Preview Section */
 .service-preview {
   background: white;
   border-radius: 16px;
@@ -90,7 +89,6 @@
   font-size: 1rem;
 }
 
-/* Reservation Form Section */
 .reservation-form-container {
   background: white;
   border-radius: 16px;
@@ -169,7 +167,6 @@
   min-height: 100px;
 }
 
-/* Form Actions */
 .form-actions {
   display: flex;
   gap: 12px;
@@ -218,7 +215,6 @@
   transform: none;
 }
 
-/* Loading State */
 .reservation-loading {
   display: flex;
   flex-direction: column;
@@ -239,25 +235,29 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-/* Responsive Design */
 @media (max-width: 992px) {
   .reservation-content {
     grid-template-columns: 1fr;
     gap: 25px;
   }
-  
+
   .service-preview {
     position: static;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .reservation-header h1 {
     font-size: 1.7rem;
   }
@@ -267,32 +267,32 @@
   .reservation-page {
     padding: 15px 10px;
   }
-  
+
   .reservation-container {
     padding: 0;
   }
-  
+
   .reservation-header h1 {
     font-size: 1.5rem;
   }
-  
+
   .service-preview,
   .reservation-form-container {
     padding: 20px;
   }
-  
+
   .service-image {
     height: 160px;
   }
-  
+
   .service-price {
     font-size: 1.4rem;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .btn-cancel,
   .btn-reserve {
     width: 100%;
@@ -303,16 +303,16 @@
   .reservation-header h1 {
     font-size: 1.3rem;
   }
-  
+
   .service-preview,
   .reservation-form-container {
     padding: 15px;
   }
-  
+
   .reservation-form-container h2 {
     font-size: 1.3rem;
   }
-  
+
   .form-group input,
   .form-group select,
   .form-group textarea {
