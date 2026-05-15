@@ -93,7 +93,7 @@ class AddFeaturedPrestataires extends Command
                         'price' => 2600,
                         'duration' => 120,
                         'category' => 'Negafa',
-                        'image' => 'makeup2.jpg',
+                        'image' => 'makeup4.jpg',
                         'reviews' => [
                             ['client_index' => 1, 'rating' => 5, 'comment' => 'Maquillage impeccable jusqu a la fin de la soiree.'],
                             ['client_index' => 4, 'rating' => 4, 'comment' => 'Tres beau glow et excellente ecoute des envies.'],
@@ -183,11 +183,11 @@ class AddFeaturedPrestataires extends Command
 
     private function copyImage(string $filename, string $directory): string
     {
-        $source = base_path('../frontEnd/public/images/' . $filename);
+        $source = $this->resolveSourcePath($filename);
         $destinationDirectory = storage_path('app/public/' . $directory);
         $destination = $destinationDirectory . DIRECTORY_SEPARATOR . $filename;
 
-        if (!File::exists($source)) {
+        if (!$source || !File::exists($source)) {
             throw new \RuntimeException("Missing source image: {$filename}");
         }
 
@@ -200,5 +200,23 @@ class AddFeaturedPrestataires extends Command
         }
 
         return $directory . '/' . $filename;
+    }
+
+    private function resolveSourcePath(string $filename): ?string
+    {
+        $directories = [
+            base_path('../frontEnd/public/image'),
+            base_path('../frontEnd/public/images'),
+        ];
+
+        foreach ($directories as $directory) {
+            $path = $directory . DIRECTORY_SEPARATOR . $filename;
+
+            if (File::exists($path)) {
+                return $path;
+            }
+        }
+
+        return null;
     }
 }

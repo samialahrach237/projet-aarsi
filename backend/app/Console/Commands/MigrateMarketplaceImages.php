@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Photo;
 use App\Models\Prestataire;
 use App\Models\Service;
 use Illuminate\Console\Command;
@@ -18,9 +19,9 @@ class MigrateMarketplaceImages extends Command
 
     public function handle(): int
     {
-        $sourceDirectory = base_path('../frontEnd/public/images');
+        $sourceDirectory = $this->resolveSourceDirectory();
 
-        if (!File::isDirectory($sourceDirectory)) {
+        if (!$sourceDirectory) {
             $this->error("Source image directory not found: {$sourceDirectory}");
 
             return self::FAILURE;
@@ -36,6 +37,8 @@ class MigrateMarketplaceImages extends Command
             'lieux' => ['salle11.jpg', 'salle12.jpg', 'salle2.jpg', 'salle6.jpg', 'salle7.jpg', 'salle8.jpg', 'salle9.jpg', 'image6.jpg'],
             'traiteur' => ['Traiteur3.jpg'],
             'bijoux' => ['bijoux4.jpg', 'bijoux6.jpg', 'bijoux7.jpg', 'bijoux8.jpg', 'bijoux9.jpg'],
+            'hanna' => ['hanna.jpg', 'hanna1.jpg', 'hanna2.jpg', 'hanna3.jpg', 'hanna4.jpg', 'hanna8.jpg'],
+            'maquillage' => ['makeup1.jpg', 'makeup3.jpg', 'makeup4.jpg', 'makeup5.jpg', 'makeup6.jpg'],
             'dj' => ['Dj.jpg'],
             'fallback' => ['hero.jpg'],
         ];
@@ -48,11 +51,14 @@ class MigrateMarketplaceImages extends Command
             'DJ & Orchestre' => ['Dj.jpg'],
             'Bijoux' => ['bijoux4.jpg', 'bijoux6.jpg', 'bijoux7.jpg', 'bijoux8.jpg', 'bijoux9.jpg'],
             'Tayfer' => ['tyafar1.jpg', 'tyafar2.jpg', 'tyafar3.jpg', 'tyafar4.jpg', 'tyafar5.jpg'],
+            'Hanna' => ['hanna1.jpg', 'hanna2.jpg', 'hanna3.jpg', 'hanna4.jpg', 'hanna8.jpg'],
+            'Maquillage' => ['makeup3.jpg', 'makeup4.jpg', 'makeup5.jpg', 'makeup6.jpg', 'makeup1.jpg'],
             'fallback' => ['hero.jpg'],
         ];
 
         $copiedProviders = 0;
         $copiedServices = 0;
+        $copiedPhotos = 0;
 
         Prestataire::query()->get()->each(function (Prestataire $prestataire) use (
             $providerPools,
@@ -82,10 +88,41 @@ class MigrateMarketplaceImages extends Command
             }
         });
 
+        Photo::query()->get()->each(function (Photo $photo) use (
+            $providerPools,
+            $sourceDirectory,
+            &$copiedPhotos
+        ): void {
+            $filename = $this->resolvePhotoFilename($photo, $providerPools);
+            $relativePath = $this->copyImageToDisk($sourceDirectory, $filename, 'prestataires');
+
+            if ($relativePath && $photo->path !== $relativePath) {
+                $photo->forceFill(['path' => $relativePath])->save();
+                $copiedPhotos++;
+            }
+        });
+
         $this->info("Provider images updated: {$copiedProviders}");
         $this->info("Service images updated: {$copiedServices}");
+        $this->info("Provider gallery photos updated: {$copiedPhotos}");
 
         return self::SUCCESS;
+    }
+
+    private function resolveSourceDirectory(): ?string
+    {
+        $directories = [
+            base_path('../frontEnd/public/image'),
+            base_path('../frontEnd/public/images'),
+        ];
+
+        foreach ($directories as $directory) {
+            if (File::isDirectory($directory)) {
+                return $directory;
+            }
+        }
+
+        return null;
     }
 
     private function ensureDirectory(string $directory): void
@@ -111,6 +148,14 @@ class MigrateMarketplaceImages extends Command
 
         if (Str::contains($name, ['studio', 'photography', 'photo'])) {
             return $this->takeFromPool('provider-photographie', $pools['photographie']);
+        }
+
+        if (Str::contains($name, ['hanna', 'henna'])) {
+            return $this->takeFromPool('provider-hanna', $pools['hanna']);
+        }
+
+        if (Str::contains($name, ['mequeupe', 'makeup', 'maquillage', 'beauty'])) {
+            return $this->takeFromPool('provider-maquillage', $pools['maquillage']);
         }
 
         if (Str::contains($name, ['tayfer'])) {
@@ -144,6 +189,20 @@ class MigrateMarketplaceImages extends Command
             return $legacyFilename;
         }
 
+        $serviceName = Str::lower((string) $service->name);
+        $providerName = Str::lower((string) optional($service->prestataire)->nomEntreprise);
+
+        if (Str::contains($serviceName, ['hanna', 'henna']) || Str::contains($providerName, ['hanna', 'henna'])) {
+            return $this->takeFromPool('service-hanna', $pools['Hanna']);
+        }
+
+        if (
+            Str::contains($serviceName, ['makeup', 'maquillage', 'beauty', 'glam']) ||
+            Str::contains($providerName, ['mequeupe', 'makeup', 'maquillage', 'beauty'])
+        ) {
+            return $this->takeFromPool('service-maquillage', $pools['Maquillage']);
+        }
+
         $category = $service->category;
 
         if (isset($pools[$category])) {
@@ -153,6 +212,23 @@ class MigrateMarketplaceImages extends Command
         return $this->takeFromPool('service-fallback', $pools['fallback']);
     }
 
+    private function resolvePhotoFilename(Photo $photo, array $pools): string
+    {
+        $legacyFilename = $this->extractLegacyFilename($photo->path);
+
+        if ($legacyFilename) {
+            return $legacyFilename;
+        }
+
+        $provider = $photo->prestataire;
+
+        if ($provider) {
+            return $this->resolveProviderImageFilename($provider, $pools);
+        }
+
+        return $this->takeFromPool('photo-fallback', $pools['fallback']);
+    }
+
     private function extractLegacyFilename(?string $path): ?string
     {
         if (!$path) {
@@ -160,7 +236,13 @@ class MigrateMarketplaceImages extends Command
         }
 
         $filename = basename($path);
-        $sourcePath = base_path('../frontEnd/public/images/' . $filename);
+        $sourceDirectory = $this->resolveSourceDirectory();
+
+        if (!$sourceDirectory) {
+            return null;
+        }
+
+        $sourcePath = $sourceDirectory . DIRECTORY_SEPARATOR . $filename;
 
         return File::exists($sourcePath) ? $filename : null;
     }
