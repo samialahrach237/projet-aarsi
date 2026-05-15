@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  FaArrowRight,
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaClock,
+  FaRedoAlt,
+  FaTimesCircle,
+  FaUsers,
+} from "react-icons/fa";
+import { MdOutlineDashboard } from "react-icons/md";
 import UserAccountLayout from "../Components/UserAccountLayout";
 import {
   cancelReservation,
-  fetchClientAvis,
-  fetchClientProfile,
   fetchClientReservations,
 } from "../services/api";
 import { getApiErrorMessage } from "../utils/apiErrors";
@@ -15,16 +23,18 @@ function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
-  const [profile, setProfile] = useState(null);
   const [reservations, setReservations] = useState([]);
-  const [avis, setAvis] = useState([]);
+  const [counts, setCounts] = useState({ all: 0, accepted: 0, refused: 0, pending: 0 });
+  const [activeStatus, setActiveStatus] = useState("all");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0, per_page: 4 });
   const [cancellingReservationId, setCancellingReservationId] = useState(null);
 
   const emitToast = (type, message) => {
     window.dispatchEvent(new CustomEvent("toast:add", { detail: { type, message } }));
   };
 
-  const loadClientData = async (isRefresh = false) => {
+  const loadClientData = async (isRefresh = false, nextStatus = activeStatus, nextPage = page) => {
     if (isRefresh) {
       setRefreshing(true);
     } else {
@@ -34,15 +44,18 @@ function UserDashboard() {
     setError("");
 
     try {
-      const [profileData, reservationsData, avisData] = await Promise.all([
-        fetchClientProfile(),
-        fetchClientReservations(),
-        fetchClientAvis(),
-      ]);
+      const response = await fetchClientReservations(
+        {
+          status: nextStatus,
+          page: nextPage,
+          per_page: 4,
+        },
+        { raw: true }
+      );
 
-      setProfile(profileData);
-      setReservations(Array.isArray(reservationsData) ? reservationsData : []);
-      setAvis(Array.isArray(avisData) ? avisData : []);
+      setReservations(Array.isArray(response?.data) ? response.data : []);
+      setCounts(response?.counts || { all: 0, accepted: 0, refused: 0, pending: 0 });
+      setPagination(response?.meta || { current_page: 1, last_page: 1, total: 0, per_page: 4 });
     } catch (requestError) {
       setError(getApiErrorMessage(requestError, "Impossible de charger votre espace client."));
     } finally {
@@ -53,7 +66,23 @@ function UserDashboard() {
 
   useEffect(() => {
     loadClientData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleFilterChange = (status) => {
+    setActiveStatus(status);
+    setPage(1);
+    loadClientData(false, status, 1);
+  };
+
+  const handlePageChange = (nextPage) => {
+    if (nextPage < 1 || nextPage > pagination.last_page || nextPage === page) {
+      return;
+    }
+
+    setPage(nextPage);
+    loadClientData(false, activeStatus, nextPage);
+  };
 
   const handleCancel = async (reservationId) => {
     setCancellingReservationId(reservationId);
@@ -61,7 +90,7 @@ function UserDashboard() {
     try {
       await cancelReservation(reservationId);
       emitToast("success", "Reservation annulee avec succes.");
-      await loadClientData(true);
+      await loadClientData(true, activeStatus, page);
     } catch (requestError) {
       emitToast("error", getApiErrorMessage(requestError, "Impossible d'annuler cette reservation."));
     } finally {
@@ -78,19 +107,77 @@ function UserDashboard() {
     });
   };
 
-  const openProfilePage = () => {
-    navigate("/profile");
-  };
-
   const formatReservationDate = (reservation) => {
     const value = reservation?.reservation_date || reservation?.date;
-    return value ? new Date(value).toLocaleDateString("fr-FR") : "-";
+    return value
+      ? new Date(value).toLocaleDateString("fr-FR", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        })
+      : "-";
+  };
+
+  const normalizeStatus = (status = "") => (status === "rejected" ? "refused" : status);
+
+  const statusLabel = (status = "") => {
+    const normalized = normalizeStatus(status);
+    return normalized ? normalized.toUpperCase() : "PENDING";
+  };
+
+  const filterItems = [
+    { id: "all", label: "Tous", icon: <MdOutlineDashboard />, count: counts.all },
+    { id: "accepted", label: "Accepted", icon: <FaCheckCircle />, count: counts.accepted },
+    { id: "refused", label: "Refused", icon: <FaTimesCircle />, count: counts.refused },
+    { id: "pending", label: "Pending", icon: <FaClock />, count: counts.pending },
+  ];
+
+  const pageNumbers = Array.from({ length: pagination.last_page || 1 }, (_, index) => index + 1);
+
+  const renderAction = (reservation) => {
+    if (reservation.status === "pending") {
+      return (
+        <button
+          className="reservation-outline-btn reservation-cancel-modern"
+          onClick={() => handleCancel(reservation.id)}
+          disabled={cancellingReservationId === reservation.id}
+        >
+          {cancellingReservationId === reservation.id ? "Annulation..." : "Annuler"}
+          <FaArrowRight />
+        </button>
+      );
+    }
+
+    if (reservation.status === "accepted" && !reservation.has_avis) {
+      return (
+        <button className="reservation-outline-btn" onClick={() => openAvisPage(reservation)}>
+          Laisser un avis
+          <FaArrowRight />
+        </button>
+      );
+    }
+
+    if (reservation.status === "accepted" && reservation.has_avis) {
+      return (
+        <button className="reservation-outline-btn" onClick={() => navigate("/mes-avis")}>
+          Voir mon avis
+          <FaArrowRight />
+        </button>
+      );
+    }
+
+    return (
+      <button className="reservation-outline-btn" onClick={() => navigate("/mes-avis")}>
+        Voir les details
+        <FaArrowRight />
+      </button>
+    );
   };
 
   if (loading) {
     return (
       <UserAccountLayout activeTab="reservations">
-        <div className="tab-content">
+        <div className="tab-content dashboard-message-panel">
           <p>Chargement de votre espace client...</p>
         </div>
       </UserAccountLayout>
@@ -100,9 +187,9 @@ function UserDashboard() {
   if (error) {
     return (
       <UserAccountLayout activeTab="reservations">
-        <div className="tab-content">
+        <div className="tab-content dashboard-message-panel">
           <p>{error}</p>
-          <button className="save-btn" onClick={() => loadClientData()}>
+          <button className="reservation-primary-btn" onClick={() => loadClientData()}>
             Reessayer
           </button>
         </div>
@@ -112,101 +199,94 @@ function UserDashboard() {
 
   return (
     <UserAccountLayout activeTab="reservations">
-      <div className="tab-content user-dashboard-shell">
-        <section className="dashboard-panel">
-          <div className="panel-head">
-            <h2>Mes reservations</h2>
-            <button className="save-btn" onClick={() => loadClientData(true)} disabled={refreshing}>
-              {refreshing ? "Actualisation..." : "Actualiser"}
+      <div className="tab-content user-dashboard-shell reservations-modern-shell">
+        <section className="reservations-toolbar">
+          <div>
+            <h1>Mes reservations</h1>
+          </div>
+          <button className="reservation-primary-btn" onClick={() => loadClientData(true)} disabled={refreshing}>
+            <span>{refreshing ? "Actualisation..." : "Actualiser"}</span>
+            <FaRedoAlt className={refreshing ? "is-spinning" : ""} />
+          </button>
+        </section>
+
+        <section className="reservation-filters" aria-label="Filtres reservations">
+          {filterItems.map((item) => (
+            <button
+              key={item.id}
+              className={`reservation-filter-btn ${activeStatus === item.id ? "active" : ""}`}
+              onClick={() => handleFilterChange(item.id)}
+              type="button"
+            >
+              <span className={`filter-icon filter-icon-${item.id}`}>{item.icon}</span>
+              <span>{item.label}</span>
+              <strong>{item.count}</strong>
             </button>
-          </div>
-          <div className="dashboard-card-grid">
-            {reservations.length ? (
-              reservations.map((reservation) => (
-                <article key={reservation.id} className="dashboard-reservation-card">
-                  <div className="reservation-card-head">
-                    <h3>{reservation.service}</h3>
-                    <span className={`status-badge status-${reservation.status}`}>{reservation.status}</span>
-                  </div>
-                  <p>{reservation.prestataire}</p>
-                  <p>
-                    {formatReservationDate(reservation)} | {reservation.start_time} - {reservation.end_time}
-                  </p>
-                  <p>{Number(reservation.price || 0).toLocaleString("fr-FR")} MAD</p>
-                  <div className="reservation-actions">
-                    {reservation.status === "pending" ? (
-                      <button
-                        className="cancel-action-btn"
-                        onClick={() => handleCancel(reservation.id)}
-                        disabled={cancellingReservationId === reservation.id}
-                      >
-                        {cancellingReservationId === reservation.id ? "Annulation..." : "Annuler"}
-                      </button>
-                    ) : null}
-                    {reservation.status === "accepted" && !reservation.has_avis ? (
-                      <button className="review-btn-small" onClick={() => openAvisPage(reservation)}>
-                        Laisser un avis
-                      </button>
-                    ) : null}
-                    {reservation.status === "accepted" && reservation.has_avis ? (
-                      <button className="review-btn-small" onClick={() => navigate("/mes-avis")}>
-                        Voir mon avis
-                      </button>
-                    ) : null}
-                  </div>
-                </article>
-              ))
-            ) : (
-              <p>Aucune reservation disponible.</p>
-            )}
-          </div>
+          ))}
         </section>
 
-        <section className="dashboard-panel">
-          <div className="panel-head">
-            <h2>Mes avis</h2>
-          </div>
-          <div className="dashboard-card-grid">
-            {avis.length ? (
-              avis.map((review) => (
-                <article key={review.id} className="dashboard-reservation-card">
-                  <div className="reservation-card-head">
-                    <h3>{review.service || "Service"}</h3>
-                    <span className="status-badge status-accepted">{review.rating}/5</span>
+        <section className="reservations-list-modern">
+          {reservations.length ? (
+            reservations.map((reservation) => (
+              <article key={reservation.id} className="reservation-row-card">
+                <div className="reservation-row-main">
+                  <h2>{reservation.service || "Reservation AARSSI"}</h2>
+                  <p className="reservation-provider">{reservation.prestataire || "Prestataire AARSSI"}</p>
+                  <div className="reservation-row-meta">
+                    <span>
+                      <FaCalendarAlt />
+                      {formatReservationDate(reservation)}
+                    </span>
+                    <span>
+                      <FaClock />
+                      {reservation.start_time || reservation.reservation_time || "--:--"} - {reservation.end_time || "--:--"}
+                    </span>
+                    <span>
+                      <FaUsers />
+                      {reservation.guests ? `${reservation.guests} invites` : "Invites non precises"}
+                    </span>
                   </div>
-                  <p>{review.prestataire || "Prestataire"}</p>
-                  <p>{review.comment || "Aucun commentaire."}</p>
-                  <div className="reservation-actions">
-                    <button className="review-btn-small" onClick={() => navigate("/mes-avis")}>
-                      Gerer mes avis
-                    </button>
-                  </div>
-                </article>
-              ))
-            ) : (
-              <p>Vous n'avez pas encore laisse d'avis.</p>
-            )}
-          </div>
+                </div>
+                <div className="reservation-row-side">
+                  <span className={`status-pill status-${normalizeStatus(reservation.status)}`}>
+                    {normalizeStatus(reservation.status) === "accepted" ? <FaCheckCircle /> : null}
+                    {normalizeStatus(reservation.status) === "refused" ? <FaTimesCircle /> : null}
+                    {normalizeStatus(reservation.status) === "pending" ? <FaClock /> : null}
+                    {statusLabel(reservation.status)}
+                  </span>
+                  {renderAction(reservation)}
+                </div>
+              </article>
+            ))
+          ) : (
+            <div className="reservations-empty-state">
+              <FaCalendarAlt />
+              <h2>Aucune reservation disponible</h2>
+              <p>Vos prochaines demandes apparaitront ici avec leur statut en temps reel.</p>
+            </div>
+          )}
         </section>
 
-        <section className="dashboard-panel">
-          <div className="panel-head">
-            <h2>Profil</h2>
-          </div>
-          <div className="dashboard-card-grid">
-            <article className="dashboard-reservation-card">
-              <h3>{profile?.name || "Utilisateur"}</h3>
-              <p>{profile?.email || "-"}</p>
-              <p>{profile?.phone || "Telephone non renseigne"}</p>
-              <p>{profile?.city || profile?.client?.address || "Ville non renseignee"}</p>
-              <div className="reservation-actions">
-                <button className="review-btn-small" onClick={openProfilePage}>
-                  Modifier mon profil
-                </button>
-              </div>
-            </article>
-          </div>
-        </section>
+        {pagination.last_page > 1 ? (
+          <nav className="reservation-pagination" aria-label="Pagination reservations">
+            <button type="button" onClick={() => handlePageChange(page - 1)} disabled={page <= 1}>
+              Precedent
+            </button>
+            {pageNumbers.map((pageNumber) => (
+              <button
+                key={pageNumber}
+                type="button"
+                className={pageNumber === page ? "active" : ""}
+                onClick={() => handlePageChange(pageNumber)}
+              >
+                {pageNumber}
+              </button>
+            ))}
+            <button type="button" onClick={() => handlePageChange(page + 1)} disabled={page >= pagination.last_page}>
+              Suivant
+            </button>
+          </nav>
+        ) : null}
       </div>
     </UserAccountLayout>
   );

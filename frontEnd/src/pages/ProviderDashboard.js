@@ -1,22 +1,27 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addDays, addMonths, addWeeks, startOfWeek, subDays, subMonths, subWeeks } from "date-fns";
+import { UploadCloud } from "lucide-react";
 import {
   MdAdd,
-  MdAssignment,
-  MdCalendarMonth,
-  MdCheckCircle,
   MdDelete,
+  MdDesignServices,
   MdEdit,
-  MdImage,
-  MdInsights,
-  MdLogout,
+  MdEventAvailable,
   MdMenu,
+  MdPayments,
   MdPendingActions,
   MdRefresh,
   MdSave,
-  MdStorefront,
+  MdTaskAlt,
 } from "react-icons/md";
+import ProviderCalendar from "../Components/ProviderCalendar";
+import CalendarWidget from "../Components/providerDashboard/CalendarWidget";
+import CTASection from "../Components/providerDashboard/CTASection";
+import ProviderProfileCard from "../Components/providerDashboard/ProviderProfileCard";
+import ProviderSidebar from "../Components/providerDashboard/ProviderSidebar";
+import ReservationList from "../Components/providerDashboard/ReservationList";
+import StatsCards from "../Components/providerDashboard/StatsCards";
 import {
   acceptProviderReservation,
   createProviderAvailability,
@@ -34,10 +39,10 @@ import {
   updateProviderPhoto,
   updateProviderService,
   uploadProviderPhoto,
+  uploadUserProfilePhoto,
 } from "../services/api";
-import { getStoredUser, logoutUser } from "../services/authService";
+import { getStoredUser, logoutUser, refreshStoredUser } from "../services/authService";
 import { getApiErrorMessage } from "../utils/apiErrors";
-import ProviderCalendar from "../Components/ProviderCalendar";
 import "../Styles/ProviderDashboard.css";
 
 const initialServiceForm = {
@@ -48,14 +53,6 @@ const initialServiceForm = {
   description: "",
   image: null,
 };
-
-const tabs = [
-  { id: "overview", label: "Vue d'ensemble", icon: <MdInsights /> },
-  { id: "services", label: "Services", icon: <MdStorefront /> },
-  { id: "reservations", label: "Reservations", icon: <MdAssignment /> },
-  { id: "calendar", label: "Calendrier", icon: <MdCalendarMonth /> },
-  { id: "photos", label: "Photos", icon: <MdImage /> },
-];
 
 const getCategoryLabel = (category) => {
   if (typeof category === "object") {
@@ -90,17 +87,13 @@ function ProviderDashboard() {
   const [savingService, setSavingService] = useState(false);
   const [changingReservationId, setChangingReservationId] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [uploadingProfilePhoto, setUploadingProfilePhoto] = useState(false);
   const [updatingPhotoId, setUpdatingPhotoId] = useState(null);
   const [deletingPhotoId, setDeletingPhotoId] = useState(null);
   const hasLoaded = useRef(false);
 
   const emitToast = (type, message) => {
     window.dispatchEvent(new CustomEvent("toast:add", { detail: { type, message } }));
-  };
-
-  const formatReservationDate = (reservation) => {
-    const value = reservation?.reservation_date || reservation?.date;
-    return value ? new Date(value).toLocaleDateString("fr-FR") : "-";
   };
 
   const profileData = useMemo(() => {
@@ -112,6 +105,7 @@ function ProviderDashboard() {
       city: provider?.city || storedUser?.prestataire?.adresse || storedUser?.city || "Maroc",
       description: provider?.description || storedUser?.prestataire?.description || "Aucune description disponible.",
       validated: provider?.is_validated ?? storedUser?.prestataire?.is_validated ?? false,
+      photoUrl: provider?.photo_url || storedUser?.photo_url || null,
     };
   }, [dashboard, storedUser]);
 
@@ -124,31 +118,36 @@ function ProviderDashboard() {
         label: "Services actifs",
         value: values.services_count ?? 0,
         helper: "Offres publiees",
-        icon: <MdStorefront />,
+        icon: <MdDesignServices />,
       },
       {
         id: "total",
         label: "Reservations totales",
         value: values.total_reservations ?? 0,
-        helper: `${values.pending_reservations ?? 0} en attente`,
-        icon: <MdPendingActions />,
+        helper: "+1 ce mois",
+        icon: <MdEventAvailable />,
       },
       {
         id: "accepted",
         label: "Reservations confirmees",
         value: values.accepted_reservations ?? 0,
-        helper: "Commandes validees",
-        icon: <MdCheckCircle />,
+        helper: "100% de confirmation",
+        icon: <MdTaskAlt />,
       },
       {
         id: "revenue",
         label: "Chiffre estime",
         value: `${Number(values.estimated_revenue ?? 0).toLocaleString("fr-FR")} MAD`,
-        helper: `${values.photos_count ?? 0} photos en ligne`,
-        icon: <MdInsights />,
+        helper: "Total des reservations",
+        icon: <MdPayments />,
       },
     ];
   }, [dashboard]);
+
+  const formatReservationDate = (reservation) => {
+    const value = reservation?.reservation_date || reservation?.date;
+    return value ? new Date(value).toLocaleDateString("fr-FR") : "-";
+  };
 
   const reservationCalendarEvents = useMemo(
     () =>
@@ -228,7 +227,6 @@ function ProviderDashboard() {
     }
   }, [loadCalendar]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (hasLoaded.current) {
       return;
@@ -238,66 +236,40 @@ function ProviderDashboard() {
     loadDashboardData();
   }, [loadDashboardData]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (activeTab === "photos" && !photos.length && !photosLoading) {
       loadPhotos();
     }
   }, [activeTab, photos.length, photosLoading, loadPhotos]);
 
-  const setAvailabilityForDate = async (available) => {
-    if (!selectedCalendarDate) {
-      return;
-    }
-
-    setSavingAvailability(true);
-
-    const payload = {
-      date: selectedCalendarDate.toISOString().slice(0, 10),
-      available,
-    };
-
-    try {
-      if (selectedAvailabilityRule?.id) {
-        await updateProviderAvailability(selectedAvailabilityRule.id, payload);
-      } else {
-        await createProviderAvailability(payload);
-      }
-
-      emitToast("success", available ? "Jour marque comme disponible." : "Jour marque comme indisponible.");
-      await loadCalendar();
-    } catch (requestError) {
-      emitToast("error", getApiErrorMessage(requestError, "Impossible de mettre a jour la disponibilite."));
-    } finally {
-      setSavingAvailability(false);
-    }
-  };
-
-  const clearAvailabilityOverride = async () => {
-    if (!selectedAvailabilityRule?.id) {
-      setSelectedCalendarEvent(null);
-      setSelectedCalendarDate(null);
-      setCalendarView("month");
-      setCalendarDate(new Date());
-      return;
-    }
-
-    setSavingAvailability(true);
-
-    try {
-      await deleteProviderAvailability(selectedAvailabilityRule.id);
-      emitToast("success", "Disponibilite reinitialisee.");
-      await loadCalendar();
-    } catch (requestError) {
-      emitToast("error", getApiErrorMessage(requestError, "Impossible d'effacer cette disponibilite."));
-    } finally {
-      setSavingAvailability(false);
-    }
-  };
-
   const handleLogout = async () => {
     await logoutUser();
     navigate("/connexion");
+  };
+
+  const openPublicProfile = () => {
+    navigate("/provider");
+  };
+
+  const handleProfilePhotoChange = async (event) => {
+    const imageFile = event.target.files?.[0];
+
+    if (!imageFile) {
+      return;
+    }
+
+    setUploadingProfilePhoto(true);
+
+    try {
+      await uploadUserProfilePhoto(imageFile);
+      await Promise.all([refreshStoredUser(), loadDashboardData()]);
+      emitToast("success", "Photo de profil mise a jour avec succes.");
+    } catch (requestError) {
+      emitToast("error", getApiErrorMessage(requestError, "Impossible de mettre a jour votre photo de profil."));
+    } finally {
+      event.target.value = "";
+      setUploadingProfilePhoto(false);
+    }
   };
 
   const resetServiceForm = () => {
@@ -449,6 +421,56 @@ function ProviderDashboard() {
     }
   };
 
+  const setAvailabilityForDate = async (available) => {
+    if (!selectedCalendarDate) {
+      return;
+    }
+
+    setSavingAvailability(true);
+
+    const payload = {
+      date: selectedCalendarDate.toISOString().slice(0, 10),
+      available,
+    };
+
+    try {
+      if (selectedAvailabilityRule?.id) {
+        await updateProviderAvailability(selectedAvailabilityRule.id, payload);
+      } else {
+        await createProviderAvailability(payload);
+      }
+
+      emitToast("success", available ? "Jour marque comme disponible." : "Jour marque comme indisponible.");
+      await loadCalendar();
+    } catch (requestError) {
+      emitToast("error", getApiErrorMessage(requestError, "Impossible de mettre a jour la disponibilite."));
+    } finally {
+      setSavingAvailability(false);
+    }
+  };
+
+  const clearAvailabilityOverride = async () => {
+    if (!selectedAvailabilityRule?.id) {
+      setSelectedCalendarEvent(null);
+      setSelectedCalendarDate(null);
+      setCalendarView("month");
+      setCalendarDate(new Date());
+      return;
+    }
+
+    setSavingAvailability(true);
+
+    try {
+      await deleteProviderAvailability(selectedAvailabilityRule.id);
+      emitToast("success", "Disponibilite reinitialisee.");
+      await loadCalendar();
+    } catch (requestError) {
+      emitToast("error", getApiErrorMessage(requestError, "Impossible d'effacer cette disponibilite."));
+    } finally {
+      setSavingAvailability(false);
+    }
+  };
+
   const handleCalendarEventSelect = (event) => {
     setSelectedCalendarEvent(event);
     setSelectedCalendarDate(new Date(event.start));
@@ -491,92 +513,31 @@ function ProviderDashboard() {
   };
 
   const renderOverview = () => (
-    <div className="dashboard-view-content provider-section-stack">
-      <section className="provider-hero card-box">
-        <div>
-          <p className="provider-eyebrow">Espace prestataire</p>
-          <h1>{profileData.name}</h1>
-          <p className="provider-hero-copy">{profileData.description}</p>
-        </div>
-        <div className="provider-hero-meta">
-          <span className={`provider-status-pill ${profileData.validated ? "is-live" : "is-pending"}`}>
-            {profileData.validated ? "Compte valide" : "Validation en attente"}
-          </span>
-          <span>{profileData.city}</span>
-          <span>{profileData.email}</span>
-        </div>
-      </section>
-
-      <section className="provider-stats-grid">
-        {stats.map((stat) => (
-          <article key={stat.id} className="provider-stat-card">
-            <div className="provider-stat-icon">{stat.icon}</div>
-            <div>
-              <p className="provider-stat-label">{stat.label}</p>
-              <h3 className="provider-stat-value">{stat.value}</h3>
-              <p className="provider-stat-helper">{stat.helper}</p>
-            </div>
-          </article>
-        ))}
-      </section>
-
-      <section className="card-box provider-table-card">
-        <div className="provider-section-header">
-          <div>
-            <p className="provider-section-kicker">Recent</p>
-            <h2>Dernieres reservations</h2>
-          </div>
-          <button className="provider-secondary-btn" onClick={() => setActiveTab("reservations")}>
-            Voir tout
-          </button>
-        </div>
-        <div className="provider-table-wrap">
-          <table className="provider-table">
-            <thead>
-              <tr>
-                <th>Client</th>
-                <th>Service</th>
-                <th>Date</th>
-                <th>Horaire</th>
-                <th>Statut</th>
-                <th>Montant</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(dashboard?.recent_reservations || []).length ? (
-                dashboard.recent_reservations.map((reservation) => (
-                  <tr key={reservation.id}>
-                    <td>{reservation.client_name || "Client"}</td>
-                    <td>{reservation.service_name || "Service"}</td>
-                    <td>{formatReservationDate(reservation)}</td>
-                    <td>{reservation.start_time} - {reservation.end_time}</td>
-                    <td><span className={`provider-badge status-${reservation.status}`}>{reservation.status}</span></td>
-                    <td>{Number(reservation.amount || 0).toLocaleString("fr-FR")} MAD</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="provider-empty-cell">Aucune reservation recente.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+    <div className="provider-overview-grid">
+      <ProviderProfileCard
+        provider={profileData}
+        uploading={uploadingProfilePhoto}
+        onPhotoChange={handleProfilePhotoChange}
+        onOpenPublicProfile={openPublicProfile}
+      />
+      <StatsCards stats={stats} />
+      <div className="provider-overview-columns">
+        <ReservationList reservations={dashboard?.recent_reservations || reservations} onViewAll={() => setActiveTab("reservations")} />
+        <CalendarWidget reservations={reservations} onOpenCalendar={() => setActiveTab("calendar")} />
+      </div>
+      <CTASection onClick={() => setActiveTab("photos")} />
     </div>
   );
 
   const renderServices = () => (
     <div className="dashboard-view-content provider-section-stack">
-      <section className="card-box provider-form-card">
+      <section className="provider-modern-card provider-form-card">
         <div className="provider-section-header">
           <div>
-            <p className="provider-section-kicker">CRUD</p>
+            <p className="provider-section-kicker">Catalogue</p>
             <h2>{editingServiceId ? "Modifier un service" : "Ajouter un service"}</h2>
           </div>
-          {editingServiceId ? (
-            <button className="provider-secondary-btn" onClick={resetServiceForm}>Annuler</button>
-          ) : null}
+          {editingServiceId ? <button className="provider-secondary-btn" onClick={resetServiceForm}>Annuler</button> : null}
         </div>
 
         <form className="provider-form-grid" onSubmit={handleServiceSubmit}>
@@ -600,19 +561,23 @@ function ProviderDashboard() {
             <span>Description</span>
             <textarea name="description" rows="4" value={serviceForm.description} onChange={handleServiceChange} />
           </label>
-          <label className="full-width">
+          <div className="full-width provider-service-upload-field">
             <span>Image</span>
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/jpg,image/webp"
-              onChange={(event) =>
-                setServiceForm((current) => ({
-                  ...current,
-                  image: event.target.files?.[0] ?? null,
-                }))
-              }
-            />
-          </label>
+            <label className="provider-service-upload">
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                onChange={(event) =>
+                  setServiceForm((current) => ({
+                    ...current,
+                    image: event.target.files?.[0] ?? null,
+                  }))
+                }
+              />
+              <UploadCloud aria-hidden="true" strokeWidth={1.8} />
+              <span>Choisir un fichier</span>
+            </label>
+          </div>
           <div className="provider-form-actions full-width">
             <button type="submit" className="btn-save-profile" disabled={savingService}>
               {editingServiceId ? <MdSave /> : <MdAdd />}
@@ -622,13 +587,13 @@ function ProviderDashboard() {
         </form>
       </section>
 
-      <section className="card-box provider-table-card">
+      <section className="provider-modern-card provider-table-card">
         <div className="provider-section-header">
           <div>
-            <p className="provider-section-kicker">Catalogue</p>
+            <p className="provider-section-kicker">Services</p>
             <h2>Mes services</h2>
           </div>
-          <button className="provider-secondary-btn" onClick={loadDashboardData}>
+          <button className="provider-secondary-btn provider-refresh-btn" onClick={loadDashboardData}>
             <MdRefresh /> Actualiser
           </button>
         </div>
@@ -682,13 +647,13 @@ function ProviderDashboard() {
 
   const renderReservations = () => (
     <div className="dashboard-view-content provider-section-stack">
-      <section className="card-box provider-table-card">
+      <section className="provider-modern-card provider-table-card">
         <div className="provider-section-header">
           <div>
             <p className="provider-section-kicker">Demandes</p>
             <h2>Reservations clientes</h2>
           </div>
-          <button className="provider-secondary-btn" onClick={loadDashboardData}>
+          <button className="provider-secondary-btn provider-refresh-btn" onClick={loadDashboardData}>
             <MdRefresh /> Actualiser
           </button>
         </div>
@@ -720,7 +685,7 @@ function ProviderDashboard() {
                     <td>{formatReservationDate(reservation)}</td>
                     <td>{reservation.start_time} - {reservation.end_time}</td>
                     <td>{Number(reservation.price || 0).toLocaleString("fr-FR")} MAD</td>
-                    <td><span className={`provider-badge status-${reservation.status}`}>{reservation.status}</span></td>
+                    <td><span className={`provider-status-chip status-${reservation.status}`}>{reservation.status}</span></td>
                     <td>
                       {reservation.status === "pending" ? (
                         <div className="provider-row-actions provider-row-actions-wide">
@@ -759,29 +724,29 @@ function ProviderDashboard() {
 
   const renderPhotos = () => (
     <div className="dashboard-view-content provider-section-stack">
-      <section className="card-box provider-form-card">
+      <section className="provider-modern-card provider-form-card">
         <div className="provider-section-header">
           <div>
-            <p className="provider-section-kicker">Galerie</p>
+            
             <h2>Gerer les photos</h2>
           </div>
-          <button className="provider-secondary-btn" onClick={loadPhotos}>
+          <button className="provider-secondary-btn provider-refresh-btn" onClick={loadPhotos}>
             <MdRefresh /> Actualiser
           </button>
         </div>
 
         <label className="provider-upload-panel">
-          <input type="file" accept="image/png,image/jpeg,image/jpg" onChange={handlePhotoUpload} disabled={uploadingPhoto} />
+          <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" onChange={handlePhotoUpload} disabled={uploadingPhoto} />
           <span className="provider-upload-icon"><MdAdd /></span>
           <strong>{uploadingPhoto ? "Telechargement..." : "Ajouter une image"}</strong>
-          <span>JPG, JPEG ou PNG, 2 MB maximum</span>
+
         </label>
 
         {photoError ? <p className="provider-error-inline">{photoError}</p> : null}
       </section>
 
       {photosLoading ? (
-        <section className="card-box"><p>Chargement des photos...</p></section>
+        <section className="provider-modern-card"><p>Chargement des photos...</p></section>
       ) : (
         <section className="provider-photo-grid">
           {photos.length ? (
@@ -795,7 +760,7 @@ function ProviderDashboard() {
                       <MdEdit />
                       <input
                         type="file"
-                        accept="image/png,image/jpeg,image/jpg"
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
                         onChange={(event) => handlePhotoReplace(photo.id, event.target.files?.[0])}
                         disabled={updatingPhotoId === photo.id}
                         style={{ display: "none" }}
@@ -814,7 +779,7 @@ function ProviderDashboard() {
               </article>
             ))
           ) : (
-            <section className="card-box"><p>Aucune photo disponible pour le moment.</p></section>
+            <section className="provider-modern-card"><p>Aucune photo disponible pour le moment.</p></section>
           )}
         </section>
       )}
@@ -823,25 +788,20 @@ function ProviderDashboard() {
 
   const renderCalendar = () => (
     <div className="dashboard-view-content provider-section-stack">
-      <section className="card-box provider-calendar-header">
+      <section className="provider-modern-card provider-calendar-header">
         <div className="provider-section-header">
           <div>
             <p className="provider-section-kicker">Planning</p>
             <h2>Calendrier des reservations</h2>
           </div>
-          <button className="provider-secondary-btn" onClick={loadCalendar}>
+          <button className="provider-secondary-btn provider-refresh-btn" onClick={loadCalendar}>
             <MdRefresh /> Actualiser
           </button>
-        </div>
-        <div className="provider-calendar-legend">
-          <span><i className="legend-chip booked"></i> Reservations</span>
-          <span><i className="legend-chip available"></i> Disponible</span>
-          <span><i className="legend-chip unavailable"></i> Indisponible</span>
         </div>
       </section>
 
       <section className="provider-calendar-layout">
-        <div className="card-box provider-calendar-card">
+        <div className="provider-modern-card provider-calendar-card">
           <ProviderCalendar
             reservationEvents={reservationCalendarEvents}
             availabilityEvents={availabilityCalendarEvents}
@@ -854,7 +814,7 @@ function ProviderDashboard() {
           />
         </div>
 
-        <aside className="card-box provider-calendar-sidebar">
+        <aside className="provider-modern-card provider-calendar-sidebar">
           <div className="provider-calendar-panel">
             <p className="provider-section-kicker">Date selectionnee</p>
             <h3>
@@ -889,11 +849,7 @@ function ProviderDashboard() {
               >
                 Marquer indisponible
               </button>
-              <button
-                className="provider-secondary-btn"
-                onClick={clearAvailabilityOverride}
-                disabled={savingAvailability}
-              >
+              <button className="provider-secondary-btn" onClick={clearAvailabilityOverride} disabled={savingAvailability}>
                 {selectedAvailabilityRule?.id ? "Effacer la regle" : "Effacer le filtre"}
               </button>
             </div>
@@ -908,12 +864,6 @@ function ProviderDashboard() {
                 <p><strong>Email:</strong> {selectedCalendarEvent.resource.client_email || "Non renseigne"}</p>
                 <p><strong>Telephone:</strong> {selectedCalendarEvent.resource.client_phone || "Non renseigne"}</p>
                 <p><strong>Statut:</strong> {selectedCalendarEvent.resource.status || "pending"}</p>
-                <p>
-                  <strong>Horaire:</strong>{" "}
-                  {selectedCalendarEvent.start.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                  {" - "}
-                  {selectedCalendarEvent.end.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                </p>
               </>
             ) : (
               <p className="provider-inline-note">Cliquez sur une reservation pour afficher les details.</p>
@@ -924,14 +874,22 @@ function ProviderDashboard() {
     </div>
   );
 
+  const renderPlaceholder = (title) => (
+    <section className="dashboard-view-content provider-modern-card provider-placeholder-panel">
+      <MdPendingActions />
+      <h2>{title}</h2>
+      <p>Ce module est pret a etre connecte a votre API quand les donnees seront disponibles.</p>
+    </section>
+  );
+
   const renderContent = () => {
     if (loading) {
-      return <div className="dashboard-view-content"><p>Chargement de votre espace prestataire...</p></div>;
+      return <div className="dashboard-view-content provider-modern-card"><p>Chargement de votre espace prestataire...</p></div>;
     }
 
     if (error) {
       return (
-        <div className="dashboard-view-content card-box provider-error-card">
+        <div className="dashboard-view-content provider-modern-card provider-error-card">
           <p>{error}</p>
           <button className="btn-save-profile" onClick={loadDashboardData}>Reessayer</button>
         </div>
@@ -947,52 +905,42 @@ function ProviderDashboard() {
         return renderCalendar();
       case "photos":
         return renderPhotos();
+      case "avis":
+        return renderPlaceholder("Avis clients");
+      case "messages":
+        return renderPlaceholder("Messages");
+      case "payments":
+        return renderPlaceholder("Paiements");
+      case "settings":
+        return renderPlaceholder("Parametres");
       default:
         return renderOverview();
     }
   };
 
   return (
-    <div className="provider-dashboard-layout">
-      {isDrawerOpen ? <div className="drawer-backdrop active" onMouseDown={() => setIsDrawerOpen(false)}></div> : null}
+    <div className="provider-dashboard-modern">
+      {isDrawerOpen ? <div className="provider-drawer-backdrop" onMouseDown={() => setIsDrawerOpen(false)}></div> : null}
 
-      <aside className={`dashboard-sidebar ${isDrawerOpen ? "open" : ""}`}>
-        <div className="sidebar-logo-container">
-          <p className="logo-text">AAR<span>SSI</span></p>
-        </div>
-        <nav className="sidebar-nav">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={`nav-item ${activeTab === tab.id ? "active" : ""}`}
-              onClick={() => {
-                setActiveTab(tab.id);
-                setIsDrawerOpen(false);
-              }}
-            >
-              {tab.icon} {tab.label}
-            </button>
-          ))}
-          <button className="nav-item" onClick={handleLogout}>
-            <MdLogout /> Deconnexion
-          </button>
-        </nav>
-      </aside>
+      <ProviderSidebar
+        activeTab={activeTab}
+        isOpen={isDrawerOpen}
+        onChangeTab={setActiveTab}
+        onClose={() => setIsDrawerOpen(false)}
+        onLogout={handleLogout}
+      />
 
-      <main className="dashboard-main">
-        <header className="dashboard-topbar">
-          <div className="user-profile-summary">
-            <button className="mobile-menu-toggle" onClick={() => setIsDrawerOpen((current) => !current)} aria-label="Ouvrir le menu">
-              <MdMenu size={24} />
-            </button>
-            <div className="user-info">
-              <span className="user-name">{profileData.name}</span>
-              <span className="user-city">{profileData.city}</span>
-            </div>
-          </div>
-        </header>
+      <main className="provider-modern-main">
+        <button
+          className="provider-standalone-mobile-menu"
+          type="button"
+          onClick={() => setIsDrawerOpen(true)}
+          aria-label="Ouvrir le menu"
+        >
+          <MdMenu />
+        </button>
 
-        <div className="dashboard-content">{renderContent()}</div>
+        <div className="provider-modern-content">{renderContent()}</div>
       </main>
     </div>
   );

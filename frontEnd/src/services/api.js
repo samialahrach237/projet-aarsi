@@ -128,6 +128,16 @@ export const fetchProviderDashboard = async () => {
   return normalizePayload(response);
 };
 
+export const fetchProviderStatistics = async () => {
+  const response = await api.get("/provider/statistics");
+  return normalizePayload(response);
+};
+
+export const fetchProviderRecentReservations = async () => {
+  const response = await api.get("/provider/reservations/recent");
+  return normalizePayload(response);
+};
+
 export const fetchProviderServices = async () => {
   const response = await api.get("/provider/services");
   return normalizePayload(response);
@@ -238,9 +248,9 @@ export const createReservation = async (payload) => {
   return normalizePayload(response);
 };
 
-export const fetchClientReservations = async () => {
-  const response = await api.get("/client/reservations");
-  return normalizePayload(response);
+export const fetchClientReservations = async (params = {}, options = {}) => {
+  const response = await api.get("/client/reservations", { params });
+  return options.raw ? response.data : normalizePayload(response);
 };
 
 export const fetchUserReservations = fetchClientReservations;
@@ -250,9 +260,9 @@ export const cancelReservation = async (reservationId) => {
   return normalizePayload(response);
 };
 
-export const fetchClientAvis = async () => {
-  const response = await api.get("/client/avis");
-  return normalizePayload(response);
+export const fetchClientAvis = async (params = {}, options = {}) => {
+  const response = await api.get("/client/avis", { params });
+  return options.raw ? response.data : normalizePayload(response);
 };
 
 export const fetchPublicAvis = async () => {
@@ -289,8 +299,46 @@ export const updateUserProfile = async (payload) => {
   return normalizePayload(response);
 };
 
+export const fetchUserProfilePhoto = async () => {
+  const response = await api.get("/user/photo-profile");
+  return normalizePayload(response);
+};
+
+export const uploadUserProfilePhoto = async (imageFile) => {
+  const formData = new FormData();
+  formData.append("photo_profile", imageFile);
+
+  const response = await api.post("/user/photo-profile", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return normalizePayload(response);
+};
+
 export const fetchAdminUsers = async (params = {}) => {
   const response = await api.get("/admin/users", { params });
+  return normalizePayload(response);
+};
+
+export const fetchAdminUserForm = async () => {
+  const response = await api.get("/admin/users/create");
+  return normalizePayload(response);
+};
+
+export const fetchAdminUser = async (userId) => {
+  const response = await api.get(`/admin/users/${userId}/edit`);
+  return normalizePayload(response);
+};
+
+export const createAdminUser = async (payload) => {
+  const response = await api.post("/admin/users", payload);
+  return normalizePayload(response);
+};
+
+export const updateAdminUser = async (userId, payload) => {
+  const response = await api.put(`/admin/users/${userId}`, payload);
   return normalizePayload(response);
 };
 

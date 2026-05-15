@@ -3,10 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   FaBars,
   FaCalendarAlt,
+  FaEnvelope,
   FaHistory,
+  FaMapMarkerAlt,
   FaSignOutAlt,
   FaUser,
 } from "react-icons/fa";
+import ProfileAvatar from "./ProfileAvatar";
 import { getStoredUser, logoutUser } from "../services/authService";
 
 function UserAccountLayout({ activeTab, children }) {
@@ -28,6 +31,7 @@ function UserAccountLayout({ activeTab, children }) {
   const userSummary = useMemo(
     () => ({
       name: user?.name || "Utilisateur AARSSI",
+      email: user?.email || "email@aarssi.ma",
       city: user?.city || user?.client?.address || "Casablanca",
     }),
     [user]
@@ -57,7 +61,12 @@ function UserAccountLayout({ activeTab, children }) {
       {isDrawerOpen && <div className="drawer-backdrop active" onMouseDown={() => setIsDrawerOpen(false)}></div>}
 
       <aside className={`sidebar ${isDrawerOpen ? "open" : ""}`}>
-        <div className="sidebar-header"></div>
+        <div className="sidebar-header">
+          <div className="logo" aria-label="AARSSI">
+            <span className="logo-gold">AAR</span>
+            <span className="logo-green">SSI</span>
+          </div>
+        </div>
         <nav className="sidebar-nav">
           <ul className="nav-list">
             {menuItems.map((item) => (
@@ -93,9 +102,17 @@ function UserAccountLayout({ activeTab, children }) {
             <FaBars size={24} />
           </button>
 
-          <div className="user-info">
-            <h2 className="user-name">{userSummary.name}</h2>
-            <p className="user-city">{userSummary.city}</p>
+          <div className="user-profile-card">
+            <ProfileAvatar name={userSummary.name} src={user?.photo_url} size="xl" className="dashboard-profile-avatar" />
+            <div className="user-profile-details">
+              <h2 className="user-name">{userSummary.name}</h2>
+              <p className="user-profile-line">
+                <FaEnvelope /> {userSummary.email}
+              </p>
+              <p className="user-profile-line">
+                <FaMapMarkerAlt /> {userSummary.city}
+              </p>
+            </div>
           </div>
         </header>
 

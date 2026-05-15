@@ -1,5 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import {
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaEllipsisV,
+  FaEye,
+  FaHeart,
+  FaPen,
+  FaRegEdit,
+  FaStar,
+  FaTrashAlt,
+} from "react-icons/fa";
 import UserAccountLayout from "../Components/UserAccountLayout";
 import {
   createAvis,
@@ -22,7 +33,10 @@ function MyAvis() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0, per_page: 6 });
   const hasLoadedAvis = useRef(false);
+  const [viewedReview, setViewedReview] = useState(null);
   const [modalState, setModalState] = useState({
     mode: null,
     avisId: null,
@@ -37,19 +51,31 @@ function MyAvis() {
     window.dispatchEvent(new CustomEvent("toast:add", { detail: { type, message } }));
   };
 
-  const loadAvis = async () => {
+  const normalizeAvisResponse = (response) => {
+    if (Array.isArray(response)) {
+      return { items: response, meta: { current_page: 1, last_page: 1, total: response.length, per_page: response.length || 6 } };
+    }
+
+    return {
+      items: Array.isArray(response?.data) ? response.data : [],
+      meta: response?.meta || { current_page: 1, last_page: 1, total: 0, per_page: 6 },
+    };
+  };
+
+  const loadAvis = async (nextPage = page) => {
     setLoading(true);
     setError("");
 
     try {
       const [avisResponse, reservationsResponse] = await Promise.all([
-        fetchUserAvis(),
+        fetchUserAvis({ page: nextPage, per_page: 6 }, { raw: true }),
         fetchClientReservations(),
       ]);
-      const avisItems = avisResponse?.data || avisResponse || [];
+      const { items, meta } = normalizeAvisResponse(avisResponse);
       const reservations = Array.isArray(reservationsResponse) ? reservationsResponse : [];
 
-      setReviews(Array.isArray(avisItems) ? avisItems : []);
+      setReviews(items);
+      setPagination(meta);
       setReviewableReservations(
         reservations.filter(
           (reservation) => reservation.status === "accepted" && !reservation.has_avis
@@ -75,7 +101,8 @@ function MyAvis() {
     }
 
     hasLoadedAvis.current = true;
-    loadAvis();
+    loadAvis(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -91,32 +118,47 @@ function MyAvis() {
         return;
       }
 
-      setModalState({
-        mode: "create",
-        avisId: null,
-        serviceId: reservation.service_id,
-        service: reservation.service || "Service",
-        prestataire: reservation.prestataire || "Prestataire",
-        rating: 5,
-        comment: "",
-      });
-
+      openCreateModal(reservation);
       navigate(location.pathname, { replace: true, state: null });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, location.state, navigate, reviewableReservations]);
 
   const renderStars = (rating, clickable = false, onChange = null) =>
-    [1, 2, 3, 4, 5].map((star) => (
-      <button
-        key={star}
-        type="button"
-        className={`star ${star <= rating ? "selected" : ""}`}
-        onClick={clickable ? () => onChange?.(star) : undefined}
-        disabled={!clickable}
-      >
-        *
-      </button>
-    ));
+    [1, 2, 3, 4, 5].map((star) => {
+      const className = `modern-star ${star <= Number(rating || 0) ? "selected" : ""}`;
+
+      if (clickable) {
+        return (
+          <button
+            key={star}
+            type="button"
+            className={className}
+            onClick={() => onChange?.(star)}
+            aria-label={`${star} etoile${star > 1 ? "s" : ""}`}
+          >
+            <FaStar />
+          </button>
+        );
+      }
+
+      return (
+        <span key={star} className={className}>
+          <FaStar />
+        </span>
+      );
+    });
+
+  const formatDate = (date) =>
+    date
+      ? new Date(date).toLocaleDateString("fr-FR", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        })
+      : "-";
+
+  const getReviewCategory = (review) => review.category || "Service mariage";
 
   const openEditModal = (review) => {
     setModalState({
@@ -130,7 +172,13 @@ function MyAvis() {
     });
   };
 
-  const openCreateModal = (reservation) => {
+  const openCreateModal = (reservation = reviewableReservations[0]) => {
+    if (!reservation) {
+      emitToast("info", "Aucune reservation acceptee n'est disponible pour un nouvel avis.");
+      navigate("/user-dashboard");
+      return;
+    }
+
     setModalState({
       mode: "create",
       avisId: null,
@@ -154,6 +202,32 @@ function MyAvis() {
     });
   };
 
+  const handleCreateServiceChange = (event) => {
+    const reservation = reviewableReservations.find(
+      (item) => String(item.service_id) === event.target.value
+    );
+
+    if (!reservation) {
+      return;
+    }
+
+    setModalState((current) => ({
+      ...current,
+      serviceId: reservation.service_id,
+      service: reservation.service || "Service",
+      prestataire: reservation.prestataire || "Prestataire",
+    }));
+  };
+
+  const handlePageChange = (nextPage) => {
+    if (nextPage < 1 || nextPage > pagination.last_page || nextPage === page) {
+      return;
+    }
+
+    setPage(nextPage);
+    loadAvis(nextPage);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setSubmitting(true);
@@ -175,7 +249,8 @@ function MyAvis() {
       }
 
       closeModal();
-      await loadAvis();
+      setPage(1);
+      await loadAvis(1);
     } catch (requestError) {
       emitToast("error", getApiErrorMessage(requestError, "Impossible d'enregistrer cet avis."));
     } finally {
@@ -189,7 +264,7 @@ function MyAvis() {
     try {
       await deleteAvisRequest(avisId);
       emitToast("success", "Avis supprime avec succes.");
-      await loadAvis();
+      await loadAvis(page);
     } catch (requestError) {
       emitToast("error", getApiErrorMessage(requestError, "Impossible de supprimer cet avis."));
     } finally {
@@ -197,116 +272,160 @@ function MyAvis() {
     }
   };
 
+  const pageNumbers = Array.from({ length: pagination.last_page || 1 }, (_, index) => index + 1);
+
   return (
     <UserAccountLayout activeTab="avis">
-      <div className="tab-content">
-        <div className="form-section">
-          <h2 className="content-title">Mes Avis</h2>
-        </div>
-
+      <div className="tab-content avis-modern-shell">
         {loading ? (
-          <p>Chargement de vos avis...</p>
+          <div className="dashboard-message-panel">
+            <p>Chargement de vos avis...</p>
+          </div>
         ) : error ? (
-          <>
+          <div className="dashboard-message-panel">
             <p>{error}</p>
-            <button className="save-btn" onClick={loadAvis}>
+            <button className="reservation-primary-btn" onClick={() => loadAvis(page)}>
               Reessayer
             </button>
-          </>
+          </div>
         ) : (
           <>
-            <div className="avis-section-block">
-              <div className="avis-section-header">
-                <h3>Avis a laisser</h3>
-                <span>{reviewableReservations.length} service(s) a evaluer</span>
+            <section className="avis-modern-heading">
+              <div>
+                <h1>Mes avis</h1>
+                <p>Partagez votre experience et aidez d'autres futurs maries</p>
               </div>
-              <div className="reservations-grid avis-dashboard-grid">
-                {reviewableReservations.length ? (
-                  reviewableReservations.map((reservation) => (
-                    <div key={reservation.id} className="reservation-card avis-card avis-card-pending">
-                      <div className="card-header">
-                        <h3 className="service-name">{reservation.service || "Service"}</h3>
-                        <span className="avis-date">
-                          {reservation.date
-                            ? new Date(reservation.date).toLocaleDateString("fr-FR")
-                            : "-"}
-                        </span>
-                      </div>
-                      <div className="card-body">
-                        <p className="provider-name">{reservation.prestataire || "Prestataire"}</p>
-                        <p className="avis-commentaire">
-                          Votre reservation a ete acceptee. Partagez votre experience
-                          pour aider les prochains clients.
-                        </p>
-                        <div className="reservation-actions">
-                          <button
-                            className="review-btn-small"
-                            onClick={() => openCreateModal(reservation)}
-                          >
-                            Laisser un avis
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="empty-state-card">
-                    <p>Aucune reservation acceptee en attente d'avis.</p>
-                    <button className="review-btn-small" onClick={() => navigate("/user-dashboard")}>
-                      Voir mes reservations
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+              <span>{pagination.total} avis publie{pagination.total > 1 ? "s" : ""}</span>
+            </section>
 
-            <div className="avis-section-block">
-              <div className="avis-section-header">
-                <h3>Mes avis publies</h3>
-                <span>{reviews.length} avis</span>
+            <section className="avis-cta-card">
+              <div className="avis-cta-icon">
+                <FaRegEdit />
               </div>
-              <div className="reservations-grid avis-dashboard-grid">
+              <div className="avis-cta-copy">
+                <h2>Vous avez recemment reserve un service ?</h2>
+                <p>Partagez votre experience en laissant un avis pour aider d'autres futurs maries.</p>
+              </div>
+              <button className="reservation-primary-btn avis-write-btn" type="button" onClick={() => openCreateModal()}>
+                <FaPen />
+                <span>Ecrire un avis</span>
+              </button>
+            </section>
+
+            <section className="avis-published-section">
+              <h2>Mes avis publies</h2>
+
+              <div className="avis-modern-list">
                 {reviews.length ? (
                   reviews.map((review) => (
-                    <div key={review.id} className="reservation-card avis-card">
-                      <div className="card-header">
-                        <h3 className="service-name">{review.service || "Service"}</h3>
-                        <span className="avis-date">
-                          {review.date
-                            ? new Date(review.date).toLocaleDateString("fr-FR")
-                            : "-"}
-                        </span>
+                    <article key={review.id} className="avis-modern-card">
+                      <div className="avis-card-content">
+                        <span className="avis-category-badge">{getReviewCategory(review)}</span>
+                        <h3>{review.service || "Service AARSSI"}</h3>
+                        <div className="avis-rating-row" aria-label={`${review.rating} sur 5`}>
+                          {renderStars(review.rating)}
+                        </div>
+                        <p className="avis-modern-comment">{review.comment || "Aucun commentaire."}</p>
+                        <p className="avis-modern-date">
+                          <FaCalendarAlt />
+                          {formatDate(review.date)}
+                        </p>
                       </div>
-                      <div className="card-body">
-                        <p className="provider-name">{review.prestataire || "Prestataire"}</p>
-                        <div className="star-rating static-stars">{renderStars(review.rating)}</div>
-                        <p className="avis-commentaire">{review.comment || "Aucun commentaire."}</p>
-                        <div className="reservation-actions">
-                          <button className="review-btn-small" onClick={() => openEditModal(review)}>
+
+                      <div className="avis-card-side">
+                        <div className="avis-card-top-actions">
+                          <span className="avis-published-badge">
+                            <FaCheckCircle />
+                            Publie
+                          </span>
+                          <button className="avis-kebab-btn" type="button" aria-label="Options de l'avis">
+                            <FaEllipsisV />
+                          </button>
+                        </div>
+
+                        <div className="avis-action-buttons">
+                          <button className="avis-action-btn view" type="button" onClick={() => setViewedReview(review)}>
+                            Voir l'avis
+                            <FaEye />
+                          </button>
+                          <button className="avis-action-btn edit" type="button" onClick={() => openEditModal(review)}>
+                            <FaPen />
                             Modifier
                           </button>
                           <button
-                            className="cancel-action-btn"
+                            className="avis-action-btn delete"
+                            type="button"
                             onClick={() => handleDelete(review.id)}
                             disabled={deletingId === review.id}
                           >
+                            <FaTrashAlt />
                             {deletingId === review.id ? "Suppression..." : "Supprimer"}
                           </button>
                         </div>
                       </div>
-                    </div>
+                    </article>
                   ))
                 ) : (
-                  <div className="empty-state-card">
-                    <p>Vous n'avez pas encore laisse d'avis.</p>
-                    <button className="review-btn-small" onClick={() => navigate("/user-dashboard")}>
-                      Voir mes reservations
-                    </button>
+                  <div className="reservations-empty-state">
+                    <FaRegEdit />
+                    <h2>Aucun avis publie</h2>
+                    <p>Vos avis apparaitront ici apres validation de vos reservations acceptees.</p>
                   </div>
                 )}
               </div>
-            </div>
+            </section>
+
+            {pagination.last_page > 1 ? (
+              <nav className="reservation-pagination" aria-label="Pagination avis">
+                <button type="button" onClick={() => handlePageChange(page - 1)} disabled={page <= 1}>
+                  Precedent
+                </button>
+                {pageNumbers.map((pageNumber) => (
+                  <button
+                    key={pageNumber}
+                    type="button"
+                    className={pageNumber === page ? "active" : ""}
+                    onClick={() => handlePageChange(pageNumber)}
+                  >
+                    {pageNumber}
+                  </button>
+                ))}
+                <button type="button" onClick={() => handlePageChange(page + 1)} disabled={page >= pagination.last_page}>
+                  Suivant
+                </button>
+              </nav>
+            ) : null}
+
+            <section className="avis-info-card">
+              <span>
+                <FaHeart />
+              </span>
+              <div>
+                <h2>Votre avis compte</h2>
+                <p>Vos avis aident d'autres couples a faire le meilleur choix pour leur grand jour.</p>
+              </div>
+            </section>
           </>
+        )}
+
+        {viewedReview && (
+          <div className="review-modal" onMouseDown={() => setViewedReview(null)}>
+            <div className="review-form avis-view-modal" onMouseDown={(event) => event.stopPropagation()}>
+              <h3 className="review-form-title">{viewedReview.service || "Avis"}</h3>
+              <span className="avis-category-badge">{getReviewCategory(viewedReview)}</span>
+              <div className="avis-rating-row">{renderStars(viewedReview.rating)}</div>
+              <p className="avis-modern-comment">{viewedReview.comment || "Aucun commentaire."}</p>
+              <p className="avis-modern-date">
+                <FaCalendarAlt />
+                {formatDate(viewedReview.date)}
+              </p>
+              <div className="form-actions">
+                <button type="button" className="submit-review-btn" onClick={() => setViewedReview(null)}>
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {modalState.mode && (
@@ -317,7 +436,17 @@ function MyAvis() {
               </h3>
               <div className="form-group">
                 <label className="form-label">Service</label>
-                <input type="text" className="form-input" value={modalState.service} readOnly />
+                {modalState.mode === "create" && reviewableReservations.length > 1 ? (
+                  <select className="form-input" value={modalState.serviceId || ""} onChange={handleCreateServiceChange}>
+                    {reviewableReservations.map((reservation) => (
+                      <option key={reservation.id} value={reservation.service_id}>
+                        {reservation.service || "Service"} - {reservation.prestataire || "Prestataire"}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input type="text" className="form-input" value={modalState.service} readOnly />
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Prestataire</label>

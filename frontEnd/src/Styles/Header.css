@@ -114,6 +114,10 @@
   gap: 14px;
 }
 
+.header-profile-avatar {
+  margin-left: 2px;
+}
+
 .user-badge {
   display: flex;
   flex-direction: column;

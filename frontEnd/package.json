@@ -10,6 +10,7 @@
     "axios": "^1.15.0",
     "date-fns": "^4.1.0",
     "es-toolkit": "^1.44.0",
+    "lucide-react": "^1.16.0",
     "react": "^19.2.3",
     "react-big-calendar": "^1.19.4",
     "react-dom": "^19.2.3",

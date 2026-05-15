@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaSignOutAlt, FaUser } from "react-icons/fa";
 import logoImage from "../Assets/logo/logo.png";
+import ProfileAvatar from "./ProfileAvatar";
 import { getDefaultRouteForRole, getStoredUser, isAuthenticated, logoutUser } from "../services/authService";
 import "../Styles/Header.css";
 
@@ -101,6 +102,7 @@ function Header() {
                 <span className="user-badge-name">{user?.name || "Utilisateur"}</span>
                 <span className="user-badge-role">{user?.role || "client"}</span>
               </div>
+              <ProfileAvatar name={user?.name} src={user?.photo_url} size="sm" className="header-profile-avatar" />
               <button type="button" className="logout-btn" onClick={handleLogout}>
                 Deconnexion
               </button>

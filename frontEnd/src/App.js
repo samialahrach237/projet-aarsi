@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import "./index.css";
 import "./App.css";
 import Footer from "./Components/Footer";
@@ -41,48 +41,32 @@ function RoleRedirect() {
   return <Navigate to={getDefaultRouteForRole(user.role)} replace />;
 }
 
-function App() {
-  const [isAuthReady, setIsAuthReady] = useState(false);
+const DASHBOARD_ROUTE_PATHS = [
+  "/dashboard",
+  "/user-dashboard",
+  "/mes-avis",
+  "/profile",
+  "/provider-dashboard",
+  "/admin",
+  "/admin-dashboard",
+];
 
-  useEffect(() => {
-    let isMounted = true;
+const isDashboardRoute = (pathname) => {
+  const normalizedPath = pathname.replace(/\/+$/, "") || "/";
 
-    const syncAuthenticatedUser = async () => {
-      const token = getStoredToken();
+  return DASHBOARD_ROUTE_PATHS.some((routePath) => (
+    normalizedPath === routePath || normalizedPath.startsWith(`${routePath}/`)
+  ));
+};
 
-      if (!token) {
-        if (isMounted) {
-          setIsAuthReady(true);
-        }
-        return;
-      }
-
-      try {
-        await bootstrapAuth();
-      } catch (error) {
-        clearAuthData();
-      } finally {
-        if (isMounted) {
-          setIsAuthReady(true);
-        }
-      }
-    };
-
-    syncAuthenticatedUser();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  if (!isAuthReady) {
-    return null;
-  }
+function AppShell() {
+  const location = useLocation();
+  const shouldHidePublicLayout = isDashboardRoute(location.pathname);
 
   return (
-    <BrowserRouter>
+    <>
       <ScrollToTop />
-      <Header />
+      {!shouldHidePublicLayout && <Header />}
       <ToastContainer />
 
       <Routes>
@@ -125,10 +109,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/admin"
-          element={<RoleRedirect />}
-        />
+        <Route path="/admin" element={<RoleRedirect />} />
         <Route
           path="/admin-dashboard"
           element={
@@ -151,7 +132,52 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      <Footer />
+      {!shouldHidePublicLayout && <Footer />}
+    </>
+  );
+}
+
+function App() {
+  const [isAuthReady, setIsAuthReady] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const syncAuthenticatedUser = async () => {
+      const token = getStoredToken();
+
+      if (!token) {
+        if (isMounted) {
+          setIsAuthReady(true);
+        }
+        return;
+      }
+
+      try {
+        await bootstrapAuth();
+      } catch (error) {
+        clearAuthData();
+      } finally {
+        if (isMounted) {
+          setIsAuthReady(true);
+        }
+      }
+    };
+
+    syncAuthenticatedUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (!isAuthReady) {
+    return null;
+  }
+
+  return (
+    <BrowserRouter>
+      <AppShell />
     </BrowserRouter>
   );
 }

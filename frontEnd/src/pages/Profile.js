@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { FaCamera } from "react-icons/fa";
+import ProfileAvatar from "../Components/ProfileAvatar";
 import UserAccountLayout from "../Components/UserAccountLayout";
-import { fetchUserProfile, updateUserProfile } from "../services/api";
+import { fetchUserProfile, updateUserProfile, uploadUserProfilePhoto } from "../services/api";
 import { getStoredToken, refreshStoredUser } from "../services/authService";
 import { getApiErrorMessage } from "../utils/apiErrors";
 import "../Styles/UserDashboard.css";
@@ -19,6 +21,8 @@ function Profile() {
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState("");
   const [error, setError] = useState("");
   const hasLoadedProfile = useRef(false);
 
@@ -43,6 +47,7 @@ function Profile() {
         password_confirmation: "",
         created_at: profile?.created_at || "",
       });
+      setPhotoPreview(profile?.photo_url || "");
     } catch (requestError) {
       setError(getApiErrorMessage(requestError, "Impossible de charger votre profil."));
     } finally {
@@ -56,8 +61,6 @@ function Profile() {
     }
 
     const token = getStoredToken();
-
-    console.log("TOKEN before profile fetch:", token);
 
     if (!token) {
       setLoading(false);
@@ -108,6 +111,32 @@ function Profile() {
     }
   };
 
+  const handlePhotoChange = async (event) => {
+    const imageFile = event.target.files?.[0];
+
+    if (!imageFile) {
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(imageFile);
+    setPhotoPreview(previewUrl);
+    setUploadingPhoto(true);
+
+    try {
+      const profile = await uploadUserProfilePhoto(imageFile);
+      setPhotoPreview(profile?.photo_url || previewUrl);
+      await refreshStoredUser();
+      emitToast("success", "Photo de profil mise a jour avec succes.");
+    } catch (requestError) {
+      emitToast("error", getApiErrorMessage(requestError, "Impossible de mettre a jour votre photo."));
+      await loadProfile();
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+      event.target.value = "";
+      setUploadingPhoto(false);
+    }
+  };
+
   return (
     <UserAccountLayout activeTab="profile">
       <div className="tab-content">
@@ -125,6 +154,23 @@ function Profile() {
             <div className="form-section">
               <h2 className="content-title">Mon Profil</h2>
             </div>
+
+            <section className="photo-upload-section profile-photo-card">
+              <div className="avatar-wrapper-large">
+                <ProfileAvatar name={form.name} src={photoPreview} size="xl" />
+                <label className="avatar-overlay-large" title="Modifier la photo">
+                  <FaCamera className="camera-icon" />
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    onChange={handlePhotoChange}
+                    disabled={uploadingPhoto}
+                    hidden
+                  />
+                </label>
+              </div>
+              {uploadingPhoto ? <p className="profile-upload-status">Telechargement en cours...</p> : null}
+            </section>
 
             <div className="form-row">
               <div className="form-group">

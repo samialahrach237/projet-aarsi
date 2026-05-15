@@ -37,6 +37,8 @@ export const storeUserData = (user) => {
     email: user.email,
     phone: user.phone ?? null,
     city: user.city ?? null,
+    photo_profile: user.photo_profile ?? null,
+    photo_url: user.photo_url ?? null,
     created_at: user.created_at ?? null,
     role: user.role ?? null,
     client: user.client ?? null,

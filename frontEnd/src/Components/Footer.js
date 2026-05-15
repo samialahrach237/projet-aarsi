@@ -53,7 +53,7 @@ function Footer() {
       </div>
 
       <div className="footer-bottom">
-        © 2024 AARSSI. Developed with React.js. All rights reserved.
+        © 2026 AARSSI. Developed with React.js. All rights reserved.
       </div>
     </footer>
   );

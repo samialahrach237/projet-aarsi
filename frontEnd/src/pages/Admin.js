@@ -17,6 +17,8 @@ import {
 import {
   MdContentPaste,
   MdDashboard,
+  MdAdd,
+  MdEdit,
   MdEvent,
   MdFileDownload,
   MdFilterList,
@@ -30,11 +32,15 @@ import {
   MdTrendingUp,
 } from "react-icons/md";
 import {
+  createAdminUser,
   deleteAdminUser,
+  fetchAdminUser,
+  fetchAdminUserForm,
   fetchAdminPendingPrestataires,
   fetchAdminReservations,
   fetchAdminStats,
   fetchAdminUsers,
+  updateAdminUser,
   validatePrestataire,
 } from "../services/api";
 import { logoutUser } from "../services/authService";
@@ -52,6 +58,18 @@ function Admin() {
   const [pendingPrestataires, setPendingPrestataires] = useState([]);
   const [busyUserId, setBusyUserId] = useState(null);
   const [busyPrestataireId, setBusyPrestataireId] = useState(null);
+  const [userModalMode, setUserModalMode] = useState(null);
+  const [userForm, setUserForm] = useState({
+    id: null,
+    name: "",
+    email: "",
+    password: "",
+    role: "client",
+  });
+  const [userFormRoles, setUserFormRoles] = useState(["admin", "client", "prestataire"]);
+  const [userFormErrors, setUserFormErrors] = useState({});
+  const [userFormLoading, setUserFormLoading] = useState(false);
+  const [editingUserId, setEditingUserId] = useState(null);
 
   const emitToast = (type, message) => {
     window.dispatchEvent(
@@ -133,6 +151,115 @@ function Admin() {
       emitToast("error", getApiErrorMessage(requestError, "Impossible de supprimer cet utilisateur."));
     } finally {
       setBusyUserId(null);
+    }
+  };
+
+  const resetUserForm = () => {
+    setUserForm({
+      id: null,
+      name: "",
+      email: "",
+      password: "",
+      role: "client",
+    });
+    setUserFormErrors({});
+  };
+
+  const normalizeValidationErrors = (requestError) => requestError?.response?.data?.errors || {};
+
+  const openCreateUserModal = async () => {
+    resetUserForm();
+    setUserModalMode("create");
+    setUserFormLoading(true);
+
+    try {
+      const response = await fetchAdminUserForm();
+      setUserFormRoles(response?.roles || ["admin", "client", "prestataire"]);
+    } catch (requestError) {
+      emitToast("error", getApiErrorMessage(requestError, "Impossible d'ouvrir le formulaire utilisateur."));
+      setUserModalMode(null);
+    } finally {
+      setUserFormLoading(false);
+    }
+  };
+
+  const openEditUserModal = async (userId) => {
+    resetUserForm();
+    setUserModalMode("edit");
+    setEditingUserId(userId);
+    setUserFormLoading(true);
+
+    try {
+      const response = await fetchAdminUser(userId);
+      const user = response?.user || response;
+      setUserFormRoles(response?.roles || ["admin", "client", "prestataire"]);
+      setUserForm({
+        id: user.id,
+        name: user.name || "",
+        email: user.email || "",
+        password: "",
+        role: user.role || "client",
+      });
+    } catch (requestError) {
+      emitToast("error", getApiErrorMessage(requestError, "Impossible de charger cet utilisateur."));
+      setUserModalMode(null);
+    } finally {
+      setEditingUserId(null);
+      setUserFormLoading(false);
+    }
+  };
+
+  const closeUserModal = () => {
+    if (userFormLoading) {
+      return;
+    }
+
+    setUserModalMode(null);
+    resetUserForm();
+  };
+
+  const handleUserFormChange = ({ target: { name, value } }) => {
+    setUserForm((current) => ({ ...current, [name]: value }));
+    setUserFormErrors((current) => ({ ...current, [name]: undefined }));
+  };
+
+  const handleUserFormSubmit = async (event) => {
+    event.preventDefault();
+    setUserFormLoading(true);
+    setUserFormErrors({});
+
+    const payload = {
+      name: userForm.name,
+      email: userForm.email,
+      role: userForm.role,
+    };
+
+    if (userModalMode === "create" || userForm.password) {
+      payload.password = userForm.password;
+    }
+
+    try {
+      if (userModalMode === "create") {
+        await createAdminUser(payload);
+        emitToast("success", "Utilisateur ajoute avec succes.");
+      } else {
+        await updateAdminUser(userForm.id, payload);
+        emitToast("success", "Utilisateur modifie avec succes.");
+      }
+
+      setUserModalMode(null);
+      resetUserForm();
+      await loadAdminData();
+    } catch (requestError) {
+      const validationErrors = normalizeValidationErrors(requestError);
+
+      if (Object.keys(validationErrors).length) {
+        setUserFormErrors(validationErrors);
+      }
+
+      emitToast("error", getApiErrorMessage(requestError, "Impossible d'enregistrer cet utilisateur."));
+    } finally {
+      setUserFormLoading(false);
     }
   };
 
@@ -302,6 +429,9 @@ function Admin() {
           <label><MdFilterList /> Utilisateurs</label>
         </div>
         <div className="export-buttons">
+          <button className="btn-add-user" type="button" onClick={openCreateUserModal} disabled={userFormLoading}>
+            <MdAdd /> Ajouter utilisateur
+          </button>
           <button className="btn-export"><MdFileDownload /> DB</button>
         </div>
       </div>
@@ -331,6 +461,14 @@ function Admin() {
                 </td>
                 <td>{user.created_at ? new Date(user.created_at).toLocaleDateString("fr-FR") : "-"}</td>
                 <td className="action-buttons">
+                  <button
+                    className="btn-edit"
+                    type="button"
+                    onClick={() => openEditUserModal(user.id)}
+                    disabled={editingUserId === user.id || userFormLoading}
+                  >
+                    <MdEdit /> {editingUserId === user.id ? "..." : "Modifier"}
+                  </button>
                   <button
                     className="btn-delete"
                     onClick={() => handleDeleteUser(user.id)}
@@ -525,6 +663,85 @@ function Admin() {
           )}
         </div>
       </main>
+
+      {userModalMode && (
+        <div className="modal-overlay" onMouseDown={closeUserModal}>
+          <div className="modal-content admin-user-modal" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{userModalMode === "create" ? "Ajouter utilisateur" : "Modifier utilisateur"}</h2>
+              <button type="button" onClick={closeUserModal} disabled={userFormLoading}>×</button>
+            </div>
+            <form className="modal-form" onSubmit={handleUserFormSubmit}>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Nom</label>
+                  <input
+                    name="name"
+                    type="text"
+                    value={userForm.name}
+                    onChange={handleUserFormChange}
+                    disabled={userFormLoading}
+                    required
+                  />
+                  {userFormErrors.name ? <span className="form-error">{userFormErrors.name[0]}</span> : null}
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    name="email"
+                    type="email"
+                    value={userForm.email}
+                    onChange={handleUserFormChange}
+                    disabled={userFormLoading}
+                    required
+                  />
+                  {userFormErrors.email ? <span className="form-error">{userFormErrors.email[0]}</span> : null}
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>{userModalMode === "create" ? "Mot de passe" : "Mot de passe optionnel"}</label>
+                  <input
+                    name="password"
+                    type="password"
+                    value={userForm.password}
+                    onChange={handleUserFormChange}
+                    disabled={userFormLoading}
+                    required={userModalMode === "create"}
+                    placeholder={userModalMode === "edit" ? "Laisser vide pour conserver l'actuel" : ""}
+                  />
+                  {userFormErrors.password ? <span className="form-error">{userFormErrors.password[0]}</span> : null}
+                </div>
+                <div className="form-group">
+                  <label>Role</label>
+                  <select
+                    name="role"
+                    value={userForm.role}
+                    onChange={handleUserFormChange}
+                    disabled={userFormLoading}
+                    required
+                  >
+                    {userFormRoles.map((role) => (
+                      <option key={role} value={role}>{role}</option>
+                    ))}
+                  </select>
+                  {userFormErrors.role ? <span className="form-error">{userFormErrors.role[0]}</span> : null}
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" className="btn-cancel" onClick={closeUserModal} disabled={userFormLoading}>
+                  Annuler
+                </button>
+                <button type="submit" className="btn-save" disabled={userFormLoading}>
+                  {userFormLoading ? "Enregistrement..." : "Enregistrer"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
