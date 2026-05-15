@@ -22,8 +22,6 @@ const categoryIconMap = {
   tayfer: FaGift,
 };
 
-const placeholderImage = "https://via.placeholder.com/300";
-
 function Services() {
   const location = useLocation();
   const [services, setServices] = useState([]);
@@ -172,20 +170,19 @@ function Services() {
     () =>
       services.map((service) => ({
         id: service.id,
-        nomEntreprise: service?.provider?.name || service.name,
+        nomEntreprise: service.name || service?.provider?.name || "Service",
         providerSlug: service?.provider?.slug || "",
         adresse: service?.provider?.city || service?.provider?.address || "Maroc",
-        description: service.description,
+        categorie: service?.category?.name || "Service",
         primaryService: {
           id: service.id,
           name: service.name,
           category: service?.category?.name || "Service",
           price: Number(service.price || 0),
-          totalServices: 1,
         },
         rating: Number(service.rating || 0),
         reviews: Number(service.reviews_count || 0),
-        image: service.image || service?.provider?.photo || placeholderImage,
+        image: service.image || service?.provider?.photo || "",
       })),
     [services]
   );
@@ -362,10 +359,9 @@ function Services() {
           filteredServices.map((service) => (
             <PrestataireCard
               key={service.id}
-              id={service.id}
               nomEntreprise={service.nomEntreprise}
               adresse={service.adresse}
-              description={service.description}
+              categorie={service.categorie}
               primaryService={service.primaryService}
               rating={service.rating}
               reviews={service.reviews}

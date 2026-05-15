@@ -11,6 +11,16 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ServiceFactory extends Factory
 {
+    private const IMAGE_POOL_BY_CATEGORY = [
+        'Lieux de reception' => ['salle11.jpg', 'salle12.jpg', 'salle2.jpg', 'salle6.jpg', 'salle7.jpg', 'salle8.jpg', 'salle9.jpg', 'image6.jpg'],
+        'Traiteur' => ['Traiteur3.jpg'],
+        'Negafa' => ['nagafa1.jpg', 'nagafa2.jpg', 'nagafa3.jpg', 'nagafa4.jpg', 'nagafa5.jpg', 'nagafa6.jpg', 'nagafa7.jpg', 'nagafa8.jpg', 'nagafa9.jpg'],
+        'Photographie' => ['photographie7.jpg', 'photographie8.jpg', 'photographie9.jpg', 'photograph2.jpg'],
+        'DJ & Orchestre' => ['Dj.jpg'],
+        'Bijoux' => ['bijoux4.jpg', 'bijoux6.jpg', 'bijoux7.jpg', 'bijoux8.jpg', 'bijoux9.jpg'],
+        'Tayfer' => ['tyafar1.jpg', 'tyafar2.jpg', 'tyafar3.jpg', 'tyafar4.jpg', 'tyafar5.jpg'],
+    ];
+
     private const SERVICES_BY_CATEGORY = [
         'Lieux de reception' => [
             'Palais des Roses',
@@ -102,7 +112,7 @@ class ServiceFactory extends Factory
             'duration' => fake()->numberBetween(2, 10) * 30,
             'category_id' => $categoryModel?->id,
             'category' => $category,
-            'image' => 'services/service-' . fake()->numberBetween(1, 12) . '.jpg',
+            'image' => 'services/' . fake()->randomElement(self::IMAGE_POOL_BY_CATEGORY[$category]),
         ];
     }
 }

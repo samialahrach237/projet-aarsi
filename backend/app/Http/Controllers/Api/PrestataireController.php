@@ -33,7 +33,7 @@ class PrestataireController extends Controller
                     'description' => $prestataire->description,
                     'adresse' => $prestataire->adresse,
                     'image_path' => $firstPhoto?->path,
-                    'image' => $firstPhoto?->url ?? $prestataire->photo_url ?? 'https://via.placeholder.com/300',
+                    'image' => $firstPhoto?->url ?? $prestataire->photo_url,
                     'photos' => $prestataire->photos->map(function ($photo) {
                         return [
                             'id' => $photo->id,

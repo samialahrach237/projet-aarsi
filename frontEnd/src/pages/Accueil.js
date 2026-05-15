@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { fetchCategories, fetchServices } from "../services/api";
 import "../Styles/Accueil.css";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? "http://127.0.0.1:8000/api";
+const BACKEND_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "");
+
 const PROMO_FEATURES = [
   {
     icon: "fas fa-check-circle",
@@ -24,11 +27,104 @@ const PROMO_FEATURES = [
   },
 ];
 
+const HERO_GALLERY_GROUPS = [
+  {
+    alt: "Photographe professionnel",
+    images: [
+      "photo.photographie/photographie7.jpg",
+      "photo.photographie/photographie8.jpg",
+      "photo.photographie/photographie9.jpg",
+      "photo.photographie/photograph2.jpg",
+    ],
+  },
+  {
+    alt: "Traiteur gastronomique",
+    images: [
+      "photo.traiteur/Traiteur3.jpg",
+      "photo.hanna/hanna.jpg",
+      "photo.Mequeupe/makeup3.jpg",
+      "photo.Dj/Dj.jpg",
+    ],
+  },
+  {
+    alt: "Salle de reception",
+    images: [
+      "photo.salle/salle11.jpg",
+      "photo.salle/salle12.jpg",
+      "photo.salle/salle8.jpg",
+      "photo.salle/salle6.jpg",
+    ],
+  },
+  {
+    alt: "Tayfer traditionnel",
+    images: [
+      "photo.tyafar/image2.jpg",
+      "photo.tyafar/image6.jpg",
+      "photo.tyafar/tyafar1.jpg",
+      "photo.tyafar/tyafar2.jpg",
+    ],
+  },
+];
+
+const CATEGORY_IMAGE_FALLBACKS = {
+  negafa: "photo.negafa/nagafa1.jpg",
+  "lieux-de-reception": "photo.salle/salle11.jpg",
+  traiteur: "photo.traiteur/Traiteur3.jpg",
+  photographie: "photo.photographie/photographie7.jpg",
+  bijoux: "photo.bijoux/bijoux4.jpg",
+  tayfer: "photo.tyafar/tyafar1.jpg",
+  "dj-orchestre": "photo.Dj/Dj.jpg",
+  "dj-&-orchestre": "photo.Dj/Dj.jpg",
+};
+
+const buildStorageUrl = (path) => `${BACKEND_BASE_URL}/storage/${path}`;
+
+const resolveMediaUrl = (path) => {
+  if (!path) {
+    return "";
+  }
+
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  if (path.startsWith("/storage/")) {
+    return `${BACKEND_BASE_URL}${path}`;
+  }
+
+  if (path.startsWith("storage/")) {
+    return `${BACKEND_BASE_URL}/${path}`;
+  }
+
+  if (path.startsWith("/")) {
+    return `${BACKEND_BASE_URL}${path}`;
+  }
+
+  return buildStorageUrl(path);
+};
+
+const getCategoryImage = (category) => {
+  const fallbackPath =
+    CATEGORY_IMAGE_FALLBACKS[category?.slug] ??
+    CATEGORY_IMAGE_FALLBACKS[category?.name?.toLowerCase().replace(/\s+/g, "-")];
+
+  if (!category?.image) {
+    return fallbackPath ? buildStorageUrl(fallbackPath) : "";
+  }
+
+  if (category.image.startsWith("/images/")) {
+    return fallbackPath ? buildStorageUrl(fallbackPath) : resolveMediaUrl(category.image);
+  }
+
+  return resolveMediaUrl(category.image);
+};
+
 function Accueil() {
   const [services, setServices] = useState([]);
   const [categories, setCategories] = useState([]);
   const [servicesTotal, setServicesTotal] = useState(0);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [heroSlideIndex, setHeroSlideIndex] = useState(0);
 
   useEffect(() => {
     const loadHomepageData = async () => {
@@ -57,6 +153,10 @@ function Accueil() {
   }, []);
 
   const featuredCategories = useMemo(() => categories.slice(0, 8), [categories]);
+  const marqueeCategories = useMemo(
+    () => (featuredCategories.length > 1 ? [...featuredCategories, ...featuredCategories] : featuredCategories),
+    [featuredCategories]
+  );
 
   const uniqueCitiesCount = useMemo(() => {
     const cities = services
@@ -77,6 +177,15 @@ function Accueil() {
     return [...new Set([...fromServices, ...fromCategories])].slice(0, 4);
   }, [featuredCategories, services]);
 
+  const heroGalleryItems = useMemo(
+    () =>
+      HERO_GALLERY_GROUPS.map((group) => ({
+        alt: group.alt,
+        images: group.images.map((imagePath) => buildStorageUrl(imagePath)),
+      })),
+    []
+  );
+
   useEffect(() => {
     if (sliderImages.length <= 1) {
       setActiveSlideIndex(0);
@@ -89,6 +198,14 @@ function Accueil() {
 
     return () => window.clearInterval(intervalId);
   }, [sliderImages]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setHeroSlideIndex((currentIndex) => currentIndex + 1);
+    }, 4000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   return (
     <div className="home-wrapper">
@@ -111,18 +228,14 @@ function Accueil() {
 
           <div className="organizer-gallery">
             <div className="collage-grid">
-              <div className="collage-item">
-                <img src="/images/photographie7.jpg" alt="Photographe professionnel" />
-              </div>
-              <div className="collage-item">
-                <img src="/images/Traiteur3.jpg" alt="Traiteur gastronomique" />
-              </div>
-              <div className="collage-item">
-                <img src="/images/image6.jpg" alt="Salle de reception" />
-              </div>
-              <div className="collage-item">
-                <img src="/images/image2.jpg" alt="Tayfer traditionnel" />
-              </div>
+              {heroGalleryItems.map((item) => (
+                <div className="collage-item" key={item.alt}>
+                  <img
+                    src={item.images[heroSlideIndex % item.images.length]}
+                    alt={item.alt}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -178,25 +291,52 @@ function Accueil() {
             </p>
           </div>
 
-          <div className="categories-rail" role="list">
-            {featuredCategories.map((category) => (
-              <Link
-                key={category.id}
-                to={`/services?category=${category.slug}`}
-                className="category-showcase-card"
-              >
-                <div className="category-showcase-image">
-                  <img src={category.image} alt={category.name} />
-                </div>
-                <div className="category-showcase-content">
-                  <h3 className="category-showcase-name">{category.name}</h3>
-                  <p className="category-showcase-count">
-                    {category.services_count} service
-                    {category.services_count > 1 ? "s" : ""}
-                  </p>
-                </div>
-              </Link>
-            ))}
+          <div className="categories-rail">
+            <div
+              className={`categories-track ${
+                featuredCategories.length > 1 ? "is-animated" : ""
+              }`}
+              role="list"
+            >
+              {marqueeCategories.map((category, index) => {
+                const isDuplicate = index >= featuredCategories.length;
+
+                return (
+                  <Link
+                    key={`${category.id}-${index}`}
+                    to={`/services?category=${category.slug}`}
+                    className="category-showcase-card"
+                    aria-hidden={isDuplicate}
+                    tabIndex={isDuplicate ? -1 : 0}
+                  >
+                    <div className="category-showcase-image">
+                      <img
+                        src={getCategoryImage(category)}
+                        alt={category.name}
+                        loading="lazy"
+                        onError={(event) => {
+                          const fallbackSrc = getCategoryImage({
+                            ...category,
+                            image: "",
+                          });
+
+                          if (fallbackSrc && event.currentTarget.src !== fallbackSrc) {
+                            event.currentTarget.src = fallbackSrc;
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="category-showcase-content">
+                      <h3 className="category-showcase-name">{category.name}</h3>
+                      <p className="category-showcase-count">
+                        {category.services_count} service
+                        {category.services_count > 1 ? "s" : ""}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
@@ -209,7 +349,7 @@ function Accueil() {
                 {sliderImages.map((image, index) => (
                   <img
                     key={`${image}-${index}`}
-                    src={image}
+                    src={resolveMediaUrl(image)}
                     alt="Prestations mariage"
                     className={`homepage-promo-slide ${
                       index === activeSlideIndex ? "is-active" : ""
@@ -219,7 +359,7 @@ function Accueil() {
               </>
             ) : (
               <img
-                src="/images/hero.jpg"
+                src={buildStorageUrl("photo.salle/salle11.jpg")}
                 alt="Prestations mariage"
                 className="homepage-promo-slide is-active"
               />

@@ -10,6 +10,17 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class PrestataireFactory extends Factory
 {
+    private const PHOTO_POOL = [
+        'nagafa1.jpg',
+        'nagafa2.jpg',
+        'salle11.jpg',
+        'Traiteur3.jpg',
+        'photographie7.jpg',
+        'bijoux4.jpg',
+        'tyafar1.jpg',
+        'hero.jpg',
+    ];
+
     private const CITIES = [
         'Casablanca',
         'Rabat',
@@ -68,7 +79,7 @@ class PrestataireFactory extends Factory
                 'Prestataire reconnu pour son accueil, sa ponctualite et son savoir-faire inspire des traditions marocaines.',
             ]),
             'adresse' => fake()->streetAddress() . ', ' . $city,
-            'photo' => 'prestataires/prestataire-' . fake()->numberBetween(1, 8) . '.jpg',
+            'photo' => 'prestataires/' . fake()->randomElement(self::PHOTO_POOL),
             'ville' => $city,
             'is_validated' => true,
         ];
