@@ -28,11 +28,30 @@ class AvisController extends Controller
 
     public function index(Request $request)
     {
-        $avis = Avis::with(['service.prestataire.user'])
+        $query = Avis::with(['service.prestataire.user', 'service.categoryModel'])
             ->where('client_id', $request->user()->id)
             ->orderByDesc('created_at')
-            ->get()
-            ->map(fn (Avis $avis) => $this->formatAvis($avis));
+            ->orderByDesc('id');
+
+        if ($request->hasAny(['page', 'per_page'])) {
+            $perPage = max(1, min((int) $request->query('per_page', 6), 12));
+            $paginator = $query->paginate($perPage)->withQueryString();
+
+            return response()->json([
+                'success' => true,
+                'data' => $paginator->getCollection()
+                    ->map(fn (Avis $avis) => $this->formatAvis($avis))
+                    ->values(),
+                'meta' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                ],
+            ]);
+        }
+
+        $avis = $query->get()->map(fn (Avis $avis) => $this->formatAvis($avis));
 
         return response()->json($avis->values());
     }
@@ -83,7 +102,7 @@ class AvisController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Review added.',
-            'data' => $this->formatAvis($avis->load('service.prestataire.user')),
+            'data' => $this->formatAvis($avis->load('service.prestataire.user', 'service.categoryModel')),
         ], 201);
     }
 
@@ -99,7 +118,7 @@ class AvisController extends Controller
 
         return response()->json([
             'message' => 'Avis mis a jour avec succes.',
-            'data' => $this->formatAvis($avis->fresh()->load('service.prestataire.user')),
+            'data' => $this->formatAvis($avis->fresh()->load('service.prestataire.user', 'service.categoryModel')),
         ]);
     }
 

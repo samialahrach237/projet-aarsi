@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class ProviderDashboardController extends Controller
 {
-    public function overview(Request $request)
+    protected function providerContext(Request $request): array|\Illuminate\Http\JsonResponse
     {
         $user = $request->user();
         $prestataire = $user->prestataire;
@@ -22,8 +22,11 @@ class ProviderDashboardController extends Controller
             ], 403);
         }
 
-        $prestataireId = $prestataire->user_id;
+        return [$user, $prestataire, $prestataire->user_id];
+    }
 
+    protected function buildStatistics(int $prestataireId): array
+    {
         $servicesCount = Service::query()
             ->where('prestataire_id', $prestataireId)
             ->count();
@@ -47,15 +50,29 @@ class ProviderDashboardController extends Controller
             ->get()
             ->sum(fn (Reservation $reservation) => (float) ($reservation->service?->price ?? 0));
 
-        $recentReservations = Reservation::query()
-            ->with(['service:id,name,prestataire_id,price', 'client.user:id,name,email'])
+        return [
+            'services_count' => $servicesCount,
+            'total_reservations' => $totalReservations,
+            'pending_reservations' => $pendingReservations,
+            'accepted_reservations' => $acceptedReservations,
+            'rejected_reservations' => $rejectedReservations,
+            'photos_count' => $photosCount,
+            'estimated_revenue' => round($estimatedRevenue, 2),
+        ];
+    }
+
+    protected function buildRecentReservations(int $prestataireId, int $limit = 5)
+    {
+        return Reservation::query()
+            ->with(['service:id,name,prestataire_id,price,category', 'client.user:id,name,email'])
             ->whereHas('service', fn ($query) => $query->where('prestataire_id', $prestataireId))
             ->latest('id')
-            ->take(5)
+            ->take($limit)
             ->get()
             ->map(fn (Reservation $reservation) => [
                 'id' => $reservation->id,
                 'service_name' => $reservation->service?->name,
+                'service_category' => $reservation->service?->category,
                 'client_name' => $reservation->client?->user?->name,
                 'client_email' => $reservation->client?->user?->email,
                 'date' => optional($reservation->date)->toDateString(),
@@ -69,6 +86,17 @@ class ProviderDashboardController extends Controller
                 'amount' => $reservation->service?->price !== null ? (float) $reservation->service->price : 0,
             ])
             ->values();
+    }
+
+    public function overview(Request $request)
+    {
+        $context = $this->providerContext($request);
+
+        if ($context instanceof \Illuminate\Http\JsonResponse) {
+            return $context;
+        }
+
+        [$user, $prestataire, $prestataireId] = $context;
 
         return response()->json([
             'success' => true,
@@ -79,18 +107,44 @@ class ProviderDashboardController extends Controller
                     'city' => $prestataire->adresse ?: $user->city,
                     'description' => $prestataire->description,
                     'is_validated' => (bool) $prestataire->is_validated,
+                    'photo_profile' => $user->photo_profile,
+                    'photo_url' => $user->photo_url,
                 ],
-                'stats' => [
-                    'services_count' => $servicesCount,
-                    'total_reservations' => $totalReservations,
-                    'pending_reservations' => $pendingReservations,
-                    'accepted_reservations' => $acceptedReservations,
-                    'rejected_reservations' => $rejectedReservations,
-                    'photos_count' => $photosCount,
-                    'estimated_revenue' => round($estimatedRevenue, 2),
-                ],
-                'recent_reservations' => $recentReservations,
+                'stats' => $this->buildStatistics($prestataireId),
+                'recent_reservations' => $this->buildRecentReservations($prestataireId),
             ],
+        ]);
+    }
+
+    public function statistics(Request $request)
+    {
+        $context = $this->providerContext($request);
+
+        if ($context instanceof \Illuminate\Http\JsonResponse) {
+            return $context;
+        }
+
+        [, , $prestataireId] = $context;
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->buildStatistics($prestataireId),
+        ]);
+    }
+
+    public function recentReservations(Request $request)
+    {
+        $context = $this->providerContext($request);
+
+        if ($context instanceof \Illuminate\Http\JsonResponse) {
+            return $context;
+        }
+
+        [, , $prestataireId] = $context;
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->buildRecentReservations($prestataireId),
         ]);
     }
 }

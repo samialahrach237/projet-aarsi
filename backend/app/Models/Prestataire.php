@@ -30,6 +30,7 @@ class Prestataire extends Model
 
     protected $appends = [
         'photo_url',
+        'photo_profile_url',
     ];
 
     public function user()
@@ -64,5 +65,10 @@ class Prestataire extends Model
         }
 
         return asset('storage/' . ltrim($this->photo, '/'));
+    }
+
+    public function getPhotoProfileUrlAttribute(): ?string
+    {
+        return $this->user?->photo_url;
     }
 }

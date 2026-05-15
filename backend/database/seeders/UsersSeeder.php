@@ -22,7 +22,7 @@ class UsersSeeder extends Seeder
                 'email' => 'admin@gmail.com',
                 'phone' => '0600000001',
                 'city' => 'Rabat',
-            ])->toArray(),
+            ])->makeHidden('photo_url')->toArray(),
             'Admin@123',
             'admin'
         );
@@ -34,7 +34,7 @@ class UsersSeeder extends Seeder
                 'email' => 'client@gmail.com',
                 'phone' => '0600000002',
                 'city' => 'Casablanca',
-            ])->toArray(),
+            ])->makeHidden('photo_url')->toArray(),
             'Client@123',
             'client'
         );
@@ -46,13 +46,19 @@ class UsersSeeder extends Seeder
                 'email' => 'provider@gmail.com',
                 'phone' => '0600000003',
                 'city' => 'Fes',
-            ])->toArray(),
+            ])->makeHidden('photo_url')->toArray(),
             'Provider@123',
             'prestataire'
         );
 
         foreach (range(1, 5) as $index) {
-            $attributes = User::factory()->client()->make()->toArray();
+
+            $attributes = User::factory()
+                ->client()
+                ->make()
+                ->makeHidden('photo_url')
+                ->toArray();
+
             $this->createUserWithPlainPassword(
                 $credentials,
                 $attributes,
@@ -62,7 +68,13 @@ class UsersSeeder extends Seeder
         }
 
         foreach (range(1, 5) as $index) {
-            $attributes = User::factory()->prestataire()->make()->toArray();
+
+            $attributes = User::factory()
+                ->prestataire()
+                ->make()
+                ->makeHidden('photo_url')
+                ->toArray();
+
             $this->createUserWithPlainPassword(
                 $credentials,
                 $attributes,
@@ -80,6 +92,7 @@ class UsersSeeder extends Seeder
         string $plainPassword,
         string $role
     ): User {
+
         unset($attributes['password']);
 
         $user = User::create([
@@ -107,11 +120,13 @@ class UsersSeeder extends Seeder
     private function displayCredentials(Collection $credentials): void
     {
         if ($this->command) {
+
             $this->command->info('Seeded test credentials:');
+
             $this->command->table(
                 ['Role', 'Email', 'Password'],
                 $credentials
-                    ->map(fn (array $credential) => [
+                    ->map(fn(array $credential) => [
                         $credential['role'],
                         $credential['email'],
                         $credential['password'],

@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'city',
+        'photo_profile',
         'password',
         'role',
     ];
@@ -48,6 +49,10 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    protected $appends = [
+        'photo_url',
+    ];
+
     public function client()
     {
         return $this->hasOne(Client::class, 'user_id');
@@ -56,5 +61,24 @@ class User extends Authenticatable
     public function prestataire()
     {
         return $this->hasOne(Prestataire::class, 'user_id');
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'client_id');
+    }
+
+    public function avis()
+    {
+        return $this->hasMany(Avis::class, 'client_id');
+    }
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if (!$this->photo_profile) {
+            return null;
+        }
+
+        return asset('storage/' . ltrim($this->photo_profile, '/'));
     }
 }

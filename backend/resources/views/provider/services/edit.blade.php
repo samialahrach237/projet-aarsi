@@ -96,15 +96,14 @@
                                  class="h-32 rounded-lg">
                         </div>
                     @endif
-                    <div class="flex items-center justify-center w-full">
-                        <label for="image"
-                               class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
-                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
-                                <p class="text-sm text-gray-500">Cliquez pour sélectionner</p>
-                                <p class="text-xs text-gray-400">JPG, PNG, GIF</p>
-                            </div>
-                            <input id="image" type="file" name="image" class="hidden" accept="image/*">
+                    <div class="w-full">
+                        <label for="image" class="provider-upload-zone" data-provider-upload>
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>
+                                <strong data-provider-upload-label>Cliquer pour telecharger ou glisser-deposer</strong>
+                                <span>PNG, JPG jusqu'a 5MB</span>
+                            </span>
+                            <input id="image" type="file" name="image" class="provider-file-input" style="display: none;" accept="image/*">
                         </label>
                     </div>
                     @error('image')

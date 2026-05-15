@@ -50,6 +50,38 @@ class ReservationController extends Controller
         ];
     }
 
+    protected function transformClientReservation(Reservation $reservation, array $reviewedServiceIds): array
+    {
+        $reservation->loadMissing('service.prestataire.user', 'client.user');
+
+        return [
+            'id' => $reservation->id,
+            'service_id' => $reservation->service_id,
+            'prestataire_id' => $reservation->prestataire_id,
+            'service' => $reservation->service?->name,
+            'prestataire' => $reservation->service?->prestataire?->nomEntreprise
+                ?? $reservation->service?->prestataire?->user?->name,
+            'ville' => $reservation->service?->prestataire?->adresse
+                ?? $reservation->service?->prestataire?->user?->city,
+            'phone' => $reservation->phone ?: $reservation->client?->user?->phone,
+            'city' => $reservation->city,
+            'guests' => $reservation->guests,
+            'date' => $this->reservationDate($reservation),
+            'reservation_date' => $this->reservationDate($reservation),
+            'reservation_time' => $reservation->reservation_time
+                ? substr((string) $reservation->reservation_time, 0, 5)
+                : substr((string) $reservation->start_time, 0, 5),
+            'start_time' => substr((string) $reservation->start_time, 0, 5),
+            'end_time' => substr((string) $reservation->end_time, 0, 5),
+            'price' => $reservation->service?->price !== null
+                ? (float) $reservation->service->price
+                : null,
+            'message' => $reservation->message,
+            'status' => $reservation->status,
+            'has_avis' => in_array($reservation->service_id, $reviewedServiceIds, true),
+        ];
+    }
+
     public function myReservations(Request $request)
     {
         return $this->index($request);
@@ -60,45 +92,60 @@ class ReservationController extends Controller
         $user = $request->user();
 
         if ($user->role === 'client') {
+            $requestedStatus = strtolower((string) $request->query('status', 'all'));
+            $validStatuses = ['accepted', 'refused', 'rejected', 'pending'];
+            $shouldPaginate = $request->hasAny(['page', 'per_page', 'status']);
+
             $reviewedServiceIds = Avis::query()
                 ->where('client_id', $user->id)
                 ->pluck('service_id')
                 ->all();
 
-            $reservations = Reservation::with('service.prestataire.user')
-                ->where('client_id', $user->id)
+            $baseQuery = Reservation::with('service.prestataire.user', 'client.user')
+                ->where('client_id', $user->id);
+
+            if ($shouldPaginate) {
+                $countsQuery = Reservation::query()->where('client_id', $user->id);
+                $counts = [
+                    'all' => (clone $countsQuery)->count(),
+                    'accepted' => (clone $countsQuery)->where('status', 'accepted')->count(),
+                    'refused' => (clone $countsQuery)->whereIn('status', ['refused', 'rejected'])->count(),
+                    'pending' => (clone $countsQuery)->where('status', 'pending')->count(),
+                ];
+
+                if (in_array($requestedStatus, $validStatuses, true)) {
+                    if (in_array($requestedStatus, ['refused', 'rejected'], true)) {
+                        $baseQuery->whereIn('status', ['refused', 'rejected']);
+                    } else {
+                        $baseQuery->where('status', $requestedStatus);
+                    }
+                }
+
+                $perPage = max(1, min((int) $request->query('per_page', 4), 12));
+                $paginator = $baseQuery
+                    ->orderByDesc('id')
+                    ->paginate($perPage)
+                    ->withQueryString();
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $paginator->getCollection()
+                        ->map(fn (Reservation $reservation) => $this->transformClientReservation($reservation, $reviewedServiceIds))
+                        ->values(),
+                    'counts' => $counts,
+                    'meta' => [
+                        'current_page' => $paginator->currentPage(),
+                        'last_page' => $paginator->lastPage(),
+                        'per_page' => $paginator->perPage(),
+                        'total' => $paginator->total(),
+                    ],
+                ]);
+            }
+
+            $reservations = $baseQuery
                 ->orderByDesc('id')
                 ->get()
-                ->map(function (Reservation $reservation) use ($reviewedServiceIds) {
-                    $reservation->loadMissing('service.prestataire.user');
-
-                    return [
-                        'id' => $reservation->id,
-                        'service_id' => $reservation->service_id,
-                        'prestataire_id' => $reservation->prestataire_id,
-                        'service' => $reservation->service?->name,
-                        'prestataire' => $reservation->service?->prestataire?->nomEntreprise
-                            ?? $reservation->service?->prestataire?->user?->name,
-                        'ville' => $reservation->service?->prestataire?->adresse
-                            ?? $reservation->service?->prestataire?->user?->city,
-                        'phone' => $reservation->phone ?: $reservation->client?->user?->phone,
-                        'city' => $reservation->city,
-                        'guests' => $reservation->guests,
-                        'date' => $this->reservationDate($reservation),
-                        'reservation_date' => $this->reservationDate($reservation),
-                        'reservation_time' => $reservation->reservation_time
-                            ? substr((string) $reservation->reservation_time, 0, 5)
-                            : substr((string) $reservation->start_time, 0, 5),
-                        'start_time' => substr((string) $reservation->start_time, 0, 5),
-                        'end_time' => substr((string) $reservation->end_time, 0, 5),
-                        'price' => $reservation->service?->price !== null
-                            ? (float) $reservation->service->price
-                            : null,
-                        'message' => $reservation->message,
-                        'status' => $reservation->status,
-                        'has_avis' => in_array($reservation->service_id, $reviewedServiceIds, true),
-                    ];
-                })
+                ->map(fn (Reservation $reservation) => $this->transformClientReservation($reservation, $reviewedServiceIds))
                 ->values();
 
             return response()->json($reservations);

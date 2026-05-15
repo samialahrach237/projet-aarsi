@@ -42,12 +42,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [UserController::class, 'show']);
     Route::put('/user', [UserController::class, 'update']);
+    Route::get('/user/photo-profile', [UserController::class, 'photoProfile']);
+    Route::post('/user/photo-profile', [UserController::class, 'uploadPhotoProfile']);
 
     Route::prefix('/client')->middleware('role:client')->group(function () {
         Route::get('/reservations', [ReservationController::class, 'index']);
         Route::get('/avis', [AvisController::class, 'index']);
         Route::get('/profile', [UserController::class, 'show']);
         Route::put('/profile', [UserController::class, 'update']);
+        Route::get('/profile/photo', [UserController::class, 'photoProfile']);
+        Route::post('/profile/photo', [UserController::class, 'uploadPhotoProfile']);
     });
 
     Route::get('/my-services', [ServiceController::class, 'myServices'])->middleware('role:prestataire');
@@ -77,6 +81,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('/provider')->middleware('role:prestataire')->group(function () {
         Route::get('/dashboard', [ProviderDashboardController::class, 'overview']);
+        Route::get('/statistics', [ProviderDashboardController::class, 'statistics']);
+        Route::get('/reservations/recent', [ProviderDashboardController::class, 'recentReservations']);
+        Route::get('/photo-profile', [UserController::class, 'photoProfile']);
+        Route::post('/photo-profile', [UserController::class, 'uploadPhotoProfile']);
         Route::get('/services', [ServiceController::class, 'providerIndex']);
         Route::post('/services', [ServiceController::class, 'store']);
         Route::put('/services/{service}', [ServiceController::class, 'update']);
@@ -105,7 +113,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::get('/stats', [AdminController::class, 'stats']);
-        Route::get('/users', [AdminController::class, 'users']);
+        Route::get('/users', [AdminController::class, 'index']);
+        Route::get('/users/create', [AdminController::class, 'create']);
+        Route::post('/users', [AdminController::class, 'store']);
+        Route::get('/users/{user}/edit', [AdminController::class, 'edit']);
+        Route::put('/users/{user}', [AdminController::class, 'update']);
+        Route::patch('/users/{user}', [AdminController::class, 'update']);
         Route::get('/prestataires/pending', [AdminController::class, 'pendingPrestataires']);
         Route::post('/prestataires/{id}/validate', [AdminController::class, 'validatePrestataire']);
         Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);

@@ -29,7 +29,7 @@ Route::middleware('auth')->prefix('provider-dashboard')->name('provider.')->grou
     Route::post('/profile', [ProviderDashboardController::class, 'updateProfile'])->name('profile.update');
 
     // Services
-    Route::resource('services', ServiceController::class, ['as' => 'services']);
+    Route::resource('services', ServiceController::class);
 
     // Reservations
     Route::prefix('reservations')->name('reservations.')->group(function () {
@@ -42,6 +42,6 @@ Route::middleware('auth')->prefix('provider-dashboard')->name('provider.')->grou
     });
 
     // Photos
-    Route::resource('photos', PhotoController::class, ['as' => 'photos']);
+    Route::resource('photos', PhotoController::class);
     Route::post('photos/{photo}/set-profile', [PhotoController::class, 'setAsProfile'])->name('photos.setAsProfile');
 });

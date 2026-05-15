@@ -23,6 +23,8 @@ class AuthController extends Controller
             'role' => $user->role,
             'phone' => $user->phone,
             'city' => $user->city,
+            'photo_profile' => $user->photo_profile,
+            'photo_url' => $user->photo_url,
             'client' => $user->client,
             'prestataire' => $user->prestataire,
         ];
