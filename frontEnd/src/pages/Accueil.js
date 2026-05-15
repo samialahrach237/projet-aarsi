@@ -157,7 +157,6 @@ function Accueil() {
     () => (featuredCategories.length > 1 ? [...featuredCategories, ...featuredCategories] : featuredCategories),
     [featuredCategories]
   );
-
   const uniqueCitiesCount = useMemo(() => {
     const cities = services
       .map((service) => service?.provider?.city || service?.provider?.address)
