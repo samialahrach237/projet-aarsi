@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchCategories, fetchServices } from "../services/api";
 import "../Styles/Accueil.css";
@@ -57,6 +57,7 @@ function Accueil() {
   }, []);
 
   const featuredCategories = useMemo(() => categories.slice(0, 8), [categories]);
+  const categoriesRailRef = useRef(null);
 
   const uniqueCitiesCount = useMemo(() => {
     const cities = services
@@ -76,6 +77,36 @@ function Accueil() {
 
     return [...new Set([...fromServices, ...fromCategories])].slice(0, 4);
   }, [featuredCategories, services]);
+
+  useEffect(() => {
+    const railElement = categoriesRailRef.current;
+    if (!railElement || featuredCategories.length === 0) {
+      return undefined;
+    }
+
+    const speedPxPerMs = 0.15;
+    let frameId;
+    let lastTime = performance.now();
+
+    const step = (timestamp) => {
+      const delta = timestamp - lastTime;
+      lastTime = timestamp;
+
+      if (railElement) {
+        railElement.scrollLeft += speedPxPerMs * delta;
+        const resetPoint = railElement.scrollWidth / 2;
+
+        if (railElement.scrollLeft >= resetPoint) {
+          railElement.scrollLeft -= resetPoint;
+        }
+      }
+
+      frameId = window.requestAnimationFrame(step);
+    };
+
+    frameId = window.requestAnimationFrame(step);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [featuredCategories]);
 
   useEffect(() => {
     if (sliderImages.length <= 1) {
@@ -178,10 +209,10 @@ function Accueil() {
             </p>
           </div>
 
-          <div className="categories-rail" role="list">
-            {featuredCategories.map((category) => (
+          <div ref={categoriesRailRef} className="categories-rail" role="list">
+            {[...featuredCategories, ...featuredCategories].map((category, index) => (
               <Link
-                key={category.id}
+                key={`${category.id}-${index}`}
                 to={`/services?category=${category.slug}`}
                 className="category-showcase-card"
               >
