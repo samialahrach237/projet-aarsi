@@ -170,7 +170,7 @@ function Services() {
     () =>
       services.map((service) => ({
         id: service.id,
-        nomEntreprise: service.name || service?.provider?.name || "Service",
+        nomEntreprise: service?.provider?.name || "Prestataire",
         providerSlug: service?.provider?.slug || "",
         adresse: service?.provider?.city || service?.provider?.address || "Maroc",
         categorie: service?.category?.name || "Service",
@@ -187,72 +187,76 @@ function Services() {
     [services]
   );
 
-  const filteredServices = normalizedServices.filter((service) => {
-    const address = service?.adresse || "";
-    const categoryName = service?.primaryService?.category || "";
-    const categorySlug = categories.find(
-      (category) => category.name === categoryName
-    )?.slug;
-    const serviceName = service?.primaryService?.name || "";
-    const companyName = service?.nomEntreprise || "";
+  const filteredServices = useMemo(
+    () =>
+      normalizedServices.filter((service) => {
+        const address = service?.adresse || "";
+        const categoryName = service?.primaryService?.category || "";
+        const categorySlug = categories.find(
+          (category) => category.name === categoryName
+        )?.slug;
+        const serviceName = service?.primaryService?.name || "";
+        const companyName = service?.nomEntreprise || "";
 
-    if (filters.city && !address.toLowerCase().includes(filters.city.toLowerCase())) {
-      return false;
-    }
+        if (filters.city && !address.toLowerCase().includes(filters.city.toLowerCase())) {
+          return false;
+        }
 
-    if (
-      filters.category &&
-      filters.category !== "all" &&
-      filters.category !== categorySlug
-    ) {
-      return false;
-    }
+        if (
+          filters.category &&
+          filters.category !== "all" &&
+          filters.category !== categorySlug
+        ) {
+          return false;
+        }
 
-    if (filters.provider && filters.provider !== service.providerSlug) {
-      return false;
-    }
+        if (filters.provider && filters.provider !== service.providerSlug) {
+          return false;
+        }
 
-    if (filters.priceRange) {
-      const startingPrice = Number(service?.primaryService?.price || 0);
+        if (filters.priceRange) {
+          const startingPrice = Number(service?.primaryService?.price || 0);
 
-      if (filters.priceRange === "low" && startingPrice > 500) {
-        return false;
-      }
+          if (filters.priceRange === "low" && startingPrice > 500) {
+            return false;
+          }
 
-      if (
-        filters.priceRange === "medium" &&
-        (startingPrice <= 500 || startingPrice > 3000)
-      ) {
-        return false;
-      }
+          if (
+            filters.priceRange === "medium" &&
+            (startingPrice <= 500 || startingPrice > 3000)
+          ) {
+            return false;
+          }
 
-      if (filters.priceRange === "high" && startingPrice <= 3000) {
-        return false;
-      }
-    }
+          if (filters.priceRange === "high" && startingPrice <= 3000) {
+            return false;
+          }
+        }
 
-    if (filters.rating) {
-      if (filters.rating === "5" && service.rating < 5) {
-        return false;
-      }
+        if (filters.rating) {
+          if (filters.rating === "5" && service.rating < 5) {
+            return false;
+          }
 
-      if (filters.rating === "4" && service.rating < 4) {
-        return false;
-      }
-    }
+          if (filters.rating === "4" && service.rating < 4) {
+            return false;
+          }
+        }
 
-    if (filters.searchQuery) {
-      const query = filters.searchQuery.toLowerCase();
+        if (filters.searchQuery) {
+          const query = filters.searchQuery.toLowerCase();
 
-      return (
-        companyName.toLowerCase().includes(query) ||
-        address.toLowerCase().includes(query) ||
-        serviceName.toLowerCase().includes(query)
-      );
-    }
+          return (
+            companyName.toLowerCase().includes(query) ||
+            address.toLowerCase().includes(query) ||
+            serviceName.toLowerCase().includes(query)
+          );
+        }
 
-    return true;
-  });
+        return true;
+      }),
+    [categories, filters, normalizedServices]
+  );
 
   const emptyMessage = error || "Aucun prestataire trouve.";
 

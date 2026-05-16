@@ -85,9 +85,7 @@ function ProviderProfile() {
           <p className="provider-location">
             📍 {service?.provider?.city || service?.provider?.address || "Maroc"}
           </p>
-          <div className="provider-category-badge">
-            {getCategoryLabel(service?.category)}
-          </div>
+          
         </div>
 
         <div className="info-stats">

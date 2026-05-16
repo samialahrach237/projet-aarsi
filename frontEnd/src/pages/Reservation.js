@@ -205,39 +205,54 @@ function Reservation() {
     );
   }
 
+  const serviceCity = service?.provider?.city || service?.provider?.address || "Maroc";
+  const serviceCategory = getCategoryLabel(service?.category);
+  const reviewsCount = Array.isArray(service?.reviews)
+    ? service.reviews.length
+    : Number(service?.reviews_count || 0);
+
   return (
     <div className="reservation-page">
       <div className="reservation-container">
         <div className="reservation-header">
           <h1>Reserver {service.name}</h1>
           <p className="service-category">
-            {getCategoryLabel(service?.category)} - {service?.provider?.city || service?.provider?.address || "Maroc"}
+            {serviceCategory} - {serviceCity}
           </p>
         </div>
 
         <div className="reservation-content">
           <div className="service-preview">
             <div className="service-image">
-              <img
-                src={
-                  service.image ||
-                  "https://images.unsplash.com/flagged/photo-1576485436509-a7d286952b65?q=80&w=1200&auto=format&fit=crop"
-                }
-                alt={service.name}
-              />
+              {service.image || service?.provider?.photo ? (
+                <img
+                  src={service.image || service?.provider?.photo}
+                  alt={service.name}
+                />
+              ) : (
+                <div className="service-image-empty" aria-hidden="true" />
+              )}
             </div>
             <div className="service-details">
               <h3>{service.name}</h3>
-              <p className="service-price">
-                {Number(service.price || 0).toLocaleString("fr-FR")} MAD
-              </p>
-              <div className="service-rating">
-                <span className="stars">
-                  {"*".repeat(Math.max(1, Math.floor(Number(service.rating || 0))))}
-                </span>
-                <span className="rating-value">
-                  {Number(service.rating || 0).toFixed(1)}
-                </span>
+              <p className="service-city">{serviceCity}</p>
+              <p className="service-card-category">{serviceCategory}</p>
+              <div className="service-rating-row">
+                <div className="service-rating">
+                  <span className="stars">
+                    {"*".repeat(Math.max(1, Math.floor(Number(service.rating || 0))))}
+                  </span>
+                  <span className="rating-value">
+                    {Number(service.rating || 0).toFixed(1)}
+                  </span>
+                </div>
+                <span className="service-reviews-count">({reviewsCount} avis)</span>
+              </div>
+              <div className="service-price-block">
+                <span className="service-price-label">A partir de</span>
+                <p className="service-price">
+                  {Number(service.price || 0).toLocaleString("fr-FR")} MAD
+                </p>
               </div>
             </div>
           </div>

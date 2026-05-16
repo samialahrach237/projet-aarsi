@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchCategories, fetchServices } from "../services/api";
 import "../Styles/Accueil.css";
@@ -29,12 +29,13 @@ function Accueil() {
   const [categories, setCategories] = useState([]);
   const [servicesTotal, setServicesTotal] = useState(0);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [activeGalleryFrame, setActiveGalleryFrame] = useState(0);
 
   useEffect(() => {
     const loadHomepageData = async () => {
       try {
         const [servicesResponse, categoriesResponse] = await Promise.all([
-          fetchServices({ per_page: 8 }),
+          fetchServices({ per_page: 16 }),
           fetchCategories(),
         ]);
 
@@ -57,7 +58,6 @@ function Accueil() {
   }, []);
 
   const featuredCategories = useMemo(() => categories.slice(0, 8), [categories]);
-  const categoriesRailRef = useRef(null);
 
   const uniqueCitiesCount = useMemo(() => {
     const cities = services
@@ -78,35 +78,29 @@ function Accueil() {
     return [...new Set([...fromServices, ...fromCategories])].slice(0, 4);
   }, [featuredCategories, services]);
 
-  useEffect(() => {
-    const railElement = categoriesRailRef.current;
-    if (!railElement || featuredCategories.length === 0) {
-      return undefined;
+  const homeGalleryFrames = useMemo(() => {
+    const imagePool = [
+      ...services.map((service) => service?.image).filter(Boolean),
+      ...services.map((service) => service?.provider?.photo).filter(Boolean),
+    ];
+
+    const uniqueImages = [...new Set(imagePool)];
+
+    if (uniqueImages.length === 0) {
+      return [];
     }
 
-    const speedPxPerMs = 0.15;
-    let frameId;
-    let lastTime = performance.now();
+    const baseImages = uniqueImages.slice(0, 16);
+    const normalizedImages = [...baseImages];
 
-    const step = (timestamp) => {
-      const delta = timestamp - lastTime;
-      lastTime = timestamp;
+    while (normalizedImages.length < 16) {
+      normalizedImages.push(baseImages[normalizedImages.length % baseImages.length]);
+    }
 
-      if (railElement) {
-        railElement.scrollLeft += speedPxPerMs * delta;
-        const resetPoint = railElement.scrollWidth / 2;
-
-        if (railElement.scrollLeft >= resetPoint) {
-          railElement.scrollLeft -= resetPoint;
-        }
-      }
-
-      frameId = window.requestAnimationFrame(step);
-    };
-
-    frameId = window.requestAnimationFrame(step);
-    return () => window.cancelAnimationFrame(frameId);
-  }, [featuredCategories]);
+    return Array.from({ length: 4 }, (_, frameIndex) =>
+      normalizedImages.slice(frameIndex * 4, frameIndex * 4 + 4)
+    );
+  }, [services]);
 
   useEffect(() => {
     if (sliderImages.length <= 1) {
@@ -120,6 +114,19 @@ function Accueil() {
 
     return () => window.clearInterval(intervalId);
   }, [sliderImages]);
+
+  useEffect(() => {
+    if (homeGalleryFrames.length <= 1) {
+      setActiveGalleryFrame(0);
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setActiveGalleryFrame((currentFrame) => (currentFrame + 1) % homeGalleryFrames.length);
+    }, 5500);
+
+    return () => window.clearInterval(intervalId);
+  }, [homeGalleryFrames]);
 
   return (
     <div className="home-wrapper">
@@ -142,18 +149,24 @@ function Accueil() {
 
           <div className="organizer-gallery">
             <div className="collage-grid">
-              <div className="collage-item">
-                <img src="/images/photographie7.jpg" alt="Photographe professionnel" />
-              </div>
-              <div className="collage-item">
-                <img src="/images/Traiteur3.jpg" alt="Traiteur gastronomique" />
-              </div>
-              <div className="collage-item">
-                <img src="/images/image6.jpg" alt="Salle de reception" />
-              </div>
-              <div className="collage-item">
-                <img src="/images/image2.jpg" alt="Tayfer traditionnel" />
-              </div>
+              {Array.from({ length: 4 }, (_, itemIndex) => (
+                <div className="collage-item collage-item-slider" key={`gallery-slot-${itemIndex}`}>
+                  {homeGalleryFrames.length > 0 ? (
+                    homeGalleryFrames.map((frame, frameIndex) => (
+                      <img
+                        key={`${frame[itemIndex]}-${frameIndex}-${itemIndex}`}
+                        src={frame[itemIndex]}
+                        alt={`Prestations mariage ${itemIndex + 1}`}
+                        className={`collage-slide ${
+                          frameIndex === activeGalleryFrame ? "is-active" : ""
+                        }`}
+                      />
+                    ))
+                  ) : (
+                    <div className="collage-slide collage-slide-placeholder is-active" aria-hidden="true" />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -209,25 +222,27 @@ function Accueil() {
             </p>
           </div>
 
-          <div ref={categoriesRailRef} className="categories-rail" role="list">
-            {[...featuredCategories, ...featuredCategories].map((category, index) => (
-              <Link
-                key={`${category.id}-${index}`}
-                to={`/services?category=${category.slug}`}
-                className="category-showcase-card"
-              >
-                <div className="category-showcase-image">
-                  <img src={category.image} alt={category.name} />
-                </div>
-                <div className="category-showcase-content">
-                  <h3 className="category-showcase-name">{category.name}</h3>
-                  <p className="category-showcase-count">
-                    {category.services_count} service
-                    {category.services_count > 1 ? "s" : ""}
-                  </p>
-                </div>
-              </Link>
-            ))}
+          <div className="categories-rail" role="list">
+            <div className="categories-track">
+              {[...featuredCategories, ...featuredCategories].map((category, index) => (
+                <Link
+                  key={`${category.id}-${index}`}
+                  to={`/services?category=${category.slug}`}
+                  className="category-showcase-card"
+                >
+                  <div className="category-showcase-image">
+                    <img src={category.image} alt={category.name} />
+                  </div>
+                  <div className="category-showcase-content">
+                    <h3 className="category-showcase-name">{category.name}</h3>
+                    <p className="category-showcase-count">
+                      {category.services_count} service
+                      {category.services_count > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>

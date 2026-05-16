@@ -15,46 +15,46 @@
 /* --- Floating Info Card --- */
 .profile-info-card {
   background: white;
-  border-radius: 16px;
-  padding: 20px;
+  border-radius: 10px;
+  padding: 10px 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  max-width: 900px;
-  margin: -60px auto 40px;
+  max-width: 810px;
+  margin: -35px auto 22px;
   position: relative;
   z-index: 10;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 16px;
 }
 
 .info-main {
   flex: 1;
-  min-width: 250px;
+  min-width: 180px;
 }
 
 .provider-name {
   font-family: "Playfair Display", serif;
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   color: #1a1a1a;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-weight: 700;
 }
 
 .provider-location {
   color: #666;
-  font-size: 1rem;
-  margin-bottom: 12px;
+  font-size: 0.92rem;
+  margin-bottom: 10px;
 }
 
 .provider-category-badge {
   display: inline-block;
   background: #d4af37;
   color: white;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 0.78rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -63,38 +63,43 @@
 .info-stats {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
 .stat-item {
   text-align: center;
+  padding: 6px 8px;
+  min-width: 92px;
+  border-radius: 10px;
+  background: #fffdf8;
+  border: 1px solid rgba(212, 175, 55, 0.12);
 }
 
 .stars {
   color: #ffc107;
-  font-size: 1.1rem;
+  font-size: 0.88rem;
   letter-spacing: 1px;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   display: block;
 }
 
 .rating-text {
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   color: #666;
   font-weight: 500;
 }
 
 .price-value {
   display: block;
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: #006b57;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .price-label {
-  font-size: 0.7rem;
+  font-size: 0.58rem;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -102,7 +107,7 @@
 
 .stat-divider {
   width: 1px;
-  height: 40px;
+  height: 30px;
   background: #eee;
 }
 
@@ -110,10 +115,10 @@
   background-color: #006b57;
   color: white;
   border: none;
-  padding: 12px 28px;
+  padding: 13px 26px;
   border-radius: 4px;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.94rem;
   letter-spacing: 1px;
   text-transform: uppercase;
   cursor: pointer;
@@ -311,11 +316,11 @@
   }
 
   .profile-info-card {
-    margin: -40px auto 30px;
-    padding: 15px;
+    margin: -34px auto 26px;
+    padding: 14px;
     flex-direction: column;
     text-align: center;
-    gap: 15px;
+    gap: 12px;
   }
 
   .provider-name {
@@ -324,11 +329,11 @@
 
   .info-stats {
     justify-content: center;
-    gap: 15px;
+    gap: 10px;
   }
 
   .stat-divider {
-    height: 30px;
+    height: 26px;
   }
 
   .profile-content-container {
@@ -386,7 +391,7 @@
   }
 
   .profile-info-card {
-    margin: -30px auto 25px;
+    margin: -24px auto 22px;
     padding: 12px;
   }
 
@@ -400,8 +405,8 @@
   }
 
   .book-now-btn {
-    padding: 10px 20px;
-    font-size: 0.85rem;
+    padding: 11px 20px;
+    font-size: 0.84rem;
   }
 
   .info-stats {
