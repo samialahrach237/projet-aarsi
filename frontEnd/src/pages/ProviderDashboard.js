@@ -34,6 +34,7 @@ import {
   fetchProviderPhotos,
   fetchProviderReservations,
   fetchProviderServices,
+  fetchCategories,
   refuseProviderReservation,
   updateProviderAvailability,
   updateProviderPhoto,
@@ -70,6 +71,7 @@ function ProviderDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [dashboard, setDashboard] = useState(null);
+  const [serviceCategories, setServiceCategories] = useState([]);
   const [services, setServices] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [calendarEvents, setCalendarEvents] = useState([]);
@@ -210,15 +212,17 @@ function ProviderDashboard() {
     setError("");
 
     try {
-      const [dashboardResponse, servicesResponse, reservationsResponse] = await Promise.all([
+      const [dashboardResponse, servicesResponse, reservationsResponse, categoriesResponse] = await Promise.all([
         fetchProviderDashboard(),
         fetchProviderServices(),
         fetchProviderReservations(),
+        fetchCategories(),
       ]);
 
       setDashboard(dashboardResponse || null);
       setServices(Array.isArray(servicesResponse) ? servicesResponse : []);
       setReservations(Array.isArray(reservationsResponse) ? reservationsResponse : []);
+      setServiceCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
       await loadCalendar();
     } catch (requestError) {
       setError(getApiErrorMessage(requestError, "Impossible de charger votre espace prestataire."));
@@ -547,7 +551,14 @@ function ProviderDashboard() {
           </label>
           <label>
             <span>Categorie</span>
-            <input name="category" value={serviceForm.category} onChange={handleServiceChange} required />
+            <select name="category" value={serviceForm.category} onChange={handleServiceChange} required>
+              <option value="">Selectionner une categorie</option>
+              {serviceCategories.map((category) => (
+                <option key={category.id || category.slug || category.name} value={category.name}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </label>
           <label>
             <span>Prix (MAD)</span>

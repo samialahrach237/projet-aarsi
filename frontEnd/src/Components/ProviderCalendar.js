@@ -75,6 +75,15 @@ function ProviderCalendar({
     []
   );
 
+  const availabilityByDate = useMemo(() => {
+    const entries = availabilityEvents.map((event) => [
+      format(new Date(event.start), "yyyy-MM-dd"),
+      Boolean(event.resource?.available),
+    ]);
+
+    return new Map(entries);
+  }, [availabilityEvents]);
+
   const eventStyleGetter = (event) => {
     if (event.type === "reservation") {
       if (event.resource?.status === "accepted") {
@@ -124,6 +133,24 @@ function ProviderCalendar({
     };
   };
 
+  const dayPropGetter = (date) => {
+    const availability = availabilityByDate.get(format(date, "yyyy-MM-dd"));
+
+    if (availability === true) {
+      return {
+        className: "provider-calendar-day-available",
+      };
+    }
+
+    if (availability === false) {
+      return {
+        className: "provider-calendar-day-unavailable",
+      };
+    }
+
+    return {};
+  };
+
   return (
     <div className="provider-calendar-shell">
       <Calendar
@@ -146,6 +173,7 @@ function ProviderCalendar({
         onSelectEvent={onSelectEvent}
         onSelectSlot={onSelectSlot}
         eventPropGetter={eventStyleGetter}
+        dayPropGetter={dayPropGetter}
         components={{
           toolbar: CalendarToolbar,
         }}

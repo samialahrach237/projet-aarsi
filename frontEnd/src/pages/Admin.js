@@ -23,11 +23,7 @@ import {
   MdFileDownload,
   MdFilterList,
   MdLogout,
-  MdMessage,
-  MdPayments,
   MdPeople,
-  MdSettings,
-  MdStar,
   MdStore,
   MdTrendingUp,
 } from "react-icons/md";
@@ -613,14 +609,9 @@ function Admin() {
           <button className={currentView === "prestataires" ? "active" : ""} onClick={() => setCurrentView("prestataires")}>
             <MdStore /> Validation prestataires
           </button>
-          <button disabled><MdContentPaste /> Services</button>
           <button className={currentView === "reservations" ? "active" : ""} onClick={() => setCurrentView("reservations")}>
             <MdEvent /> Reservations
           </button>
-          <button disabled><MdStar /> Reviews</button>
-          <button disabled><MdPayments /> Payments</button>
-          <button disabled><MdMessage /> Messages</button>
-          <button disabled><MdSettings /> Settings</button>
         </nav>
       </aside>
 

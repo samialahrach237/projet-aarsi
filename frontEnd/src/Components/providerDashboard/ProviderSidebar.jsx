@@ -1,13 +1,9 @@
 import {
   MdCalendarMonth,
-  MdCreditCard,
   MdHelpOutline,
   MdImage,
   MdInsights,
   MdLogout,
-  MdMessage,
-  MdReviews,
-  MdSettings,
   MdStorefront,
   MdAssignment,
 } from "react-icons/md";
@@ -18,10 +14,6 @@ const menuItems = [
   { id: "reservations", label: "Reservations", icon: <MdAssignment /> },
   { id: "calendar", label: "Calendrier", icon: <MdCalendarMonth /> },
   { id: "photos", label: "Photos", icon: <MdImage /> },
-  { id: "avis", label: "Avis", icon: <MdReviews /> },
-  { id: "messages", label: "Messages", icon: <MdMessage /> },
-  { id: "payments", label: "Paiements", icon: <MdCreditCard /> },
-  { id: "settings", label: "Parametres", icon: <MdSettings /> },
 ];
 
 function ProviderSidebar({ activeTab, isOpen, onChangeTab, onClose, onLogout }) {
@@ -44,14 +36,18 @@ function ProviderSidebar({ activeTab, isOpen, onChangeTab, onClose, onLogout }) 
             <span>{item.label}</span>
           </button>
         ))}
-      </nav>
 
-      <div className="provider-sidebar-footer">
-        <button className="provider-sidebar-link provider-logout-link" onClick={onLogout} type="button">
+        <button
+          className="provider-sidebar-link provider-logout-link"
+          onClick={onLogout}
+          type="button"
+        >
           <MdLogout />
           <span>Deconnexion</span>
         </button>
+      </nav>
 
+      <div className="provider-sidebar-footer">
         <div className="provider-support-card">
           <MdHelpOutline />
           <strong>Besoin d'aide ?</strong>

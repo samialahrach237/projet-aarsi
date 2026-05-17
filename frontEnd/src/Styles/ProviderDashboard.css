@@ -1323,6 +1323,23 @@
   background: rgba(200, 155, 60, 0.12);
 }
 
+.provider-calendar-shell .rbc-day-bg.provider-calendar-day-available,
+.provider-calendar-shell .rbc-time-slot.provider-calendar-day-available,
+.provider-calendar-shell .rbc-timeslot-group.provider-calendar-day-available {
+  background: rgba(45, 140, 73, 0.16);
+}
+
+.provider-calendar-shell .rbc-day-bg.provider-calendar-day-unavailable,
+.provider-calendar-shell .rbc-time-slot.provider-calendar-day-unavailable,
+.provider-calendar-shell .rbc-timeslot-group.provider-calendar-day-unavailable {
+  background: rgba(194, 65, 65, 0.16);
+}
+
+.provider-calendar-shell .rbc-day-bg.provider-calendar-day-available + .rbc-day-bg.provider-calendar-day-unavailable,
+.provider-calendar-shell .rbc-day-bg.provider-calendar-day-unavailable + .rbc-day-bg.provider-calendar-day-available {
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.75);
+}
+
 .provider-calendar-sidebar {
   display: grid;
   align-content: start;
