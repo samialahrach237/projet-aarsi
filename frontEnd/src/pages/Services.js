@@ -127,16 +127,8 @@ function Services() {
         { id: "photographie", title: "Photographie", type: "category" },
         { id: "bijoux", title: "Bijoux", type: "category" },
         { id: "tayfer", title: "Tayfer", type: "category" },
-        {
-          id: "hanna-prestige-marrakech",
-          title: "Hanna",
-          type: "provider",
-        },
-        {
-          id: "mequeupe-beauty-casablanca",
-          title: "Maquillage",
-          type: "provider",
-        },
+        {  id: "hanna-prestige-marrakech", title: "Hanna",type: "provider",        },
+        {id: "mequeupe-beauty-casablanca",title: "Maquillage",type: "provider",},
       ];
 
       return allowedOrder.filter((item) => {
